@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - FOTU Fabric of the Universe</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/shop.css">
+</head>
+<body>
+
+    <main class="shop-main">
+        <section class="hero-shop">
+            <div class="container">
+                <h1>Digital Fabric Collections</h1>
+                <p class="hero-subtitle">Algorithmic art meets textile design. Each pattern is a living system, evolving and responding to its environment.</p>
+                
+                <div class="shop-filters">
+                    <button class="filter-btn active" data-filter="all">All Collections</button>
+                    <button class="filter-btn" data-filter="neural">Neural Networks</button>
+                    <button class="filter-btn" data-filter="fractal">Fractals</button>
+                    <button class="filter-btn" data-filter="cellular">Cellular Automata</button>
+                    <button class="filter-btn" data-filter="quantum">Quantum</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="product-gallery">
+            <div class="container">
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-collection">
+            <div class="container">
+                <h2>Featured: Synesthetic Series</h2>
+                <div class="featured-content">
+                    <div class="featured-visual">
+                        <canvas id="featuredCanvas" class="featured-canvas"></canvas>
+                        <div class="play-button" onclick="toggleAnimation()">
+                            <span id="playIcon">▶</span>
+                        </div>
+                    </div>
+                    <div class="featured-info">
+                        <h3>Neural Symphony #001</h3>
+                        <p class="featured-price">$1,200</p>
+                        <p class="featured-description">A breakthrough piece where machine learning algorithms interpret musical compositions as visual patterns. This fabric responds to sound frequencies in real-time, creating a synesthetic experience that bridges audio and visual perception.</p>
+                        <div class="featured-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Dimensions:</span>
+                                <span>150cm × 200cm</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Material:</span>
+                                <span>Smart textile with embedded sensors</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Edition:</span>
+                                <span>Limited to 10 pieces</span>
+                            </div>
+                        </div>
+                        <div class="featured-actions">
+                            <button class="btn btn-primary" onclick="addToCart('neural-symphony-001')">Add to Collection</button>
+                            <button class="btn btn-secondary" onclick="requestCustom()">Custom Commission</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="custom-work">
+            <div class="container">
+                <h2>Commission Custom Work</h2>
+                <div class="custom-content">
+                    <div class="custom-info">
+                        <p>Every space is unique. Every vision is personal. Work directly with our artists to create bespoke digital fabrics tailored to your specific requirements.</p>
+                        <div class="custom-process">
+                            <div class="process-step">
+                                <div class="step-icon">💭</div>
+                                <h4>Consultation</h4>
+                                <p>Share your vision, space requirements, and aesthetic preferences.</p>
+                            </div>
+                            <div class="process-step">
+                                <div class="step-icon">🧬</div>
+                                <h4>Algorithm Design</h4>
+                                <p>We create custom algorithms based on your unique parameters.</p>
+                            </div>
+                            <div class="process-step">
+                                <div class="step-icon">🎨</div>
+                                <h4>Fabrication</h4>
+                                <p>Your pattern is brought to life through our advanced manufacturing process.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="custom-form">
+                        <h3>Start Your Commission</h3>
+                        <form class="commission-form" onsubmit="handleCommissionSubmit(event)">
+                            <input type="text" placeholder="Your Name" required>
+                            <input type="email" placeholder="Your Email" required>
+                            <select required>
+                                <option value="">Project Type</option>
+                                <option value="wall-hanging">Wall Hanging</option>
+                                <option value="room-divider">Room Divider</option>
+                                <option value="furniture">Furniture Integration</option>
+                                <option value="installation">Large Installation</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <input type="text" placeholder="Dimensions (e.g., 200cm × 300cm)">
+                            <textarea rows="4" placeholder="Describe your vision, preferred algorithms, color palette, and any special requirements..." required></textarea>
+                            <div class="budget-range">
+                                <label>Budget Range:</label>
+                                <select>
+                                    <option value="$1000-$5000">$1,000 - $5,000</option>
+                                    <option value="$5000-$15000">$5,000 - $15,000</option>
+                                    <option value="$15000+">$15,000+</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Commission Request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-body">
+                <div class="modal-image">
+                    <canvas id="modalCanvas" class="modal-canvas"></canvas>
+                </div>
+                <div class="modal-info">
+                    <h3 id="modalTitle">Product Title</h3>
+                    <p id="modalPrice" class="modal-price">$0</p>
+                    <p id="modalDescription" class="modal-description">Product description...</p>
+                    <div id="modalDetails" class="modal-details"></div>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" onclick="addToCartFromModal()">Add to Collection</button>
+                        <button class="btn btn-secondary" onclick="shareProduct()">Share</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="../js/components/Navbar.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/components/ShopGallery.js"></script>
+    <script src="../js/components/ProductModal.js"></script>
+    <script>
+        // Shop functionality
+        let cart = JSON.parse(localStorage.getItem('abi-cart') || '[]');
+        
+        function addToCart(productId) {
+            cart.push(productId);
+            localStorage.setItem('abi-cart', JSON.stringify(cart));
+            
+            // Show confirmation
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Added to Collection!';
+            btn.classList.add('loading');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('loading');
+            }, 2000);
+        }
+        
+        function addToCartFromModal() {
+            const modal = document.getElementById('productModal');
+            const productId = modal.dataset.productId;
+            addToCart(productId);
+        }
+        
+        function requestCustom() {
+            document.querySelector('.custom-work').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function handleCommissionSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const button = form.querySelector('button');
+            
+            button.textContent = 'Submitting...';
+            button.classList.add('loading');
+            
+            setTimeout(() => {
+                alert('Thank you for your commission request! We\'ll contact you within 48 hours to discuss your project.');
+                form.reset();
+                button.textContent = 'Submit Commission Request';
+                button.classList.remove('loading');
+            }, 2000);
+        }
+        
+        function shareProduct() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('modalTitle').textContent,
+                    text: document.getElementById('modalDescription').textContent,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Product link copied to clipboard!');
+                });
+            }
+        }
+        
+        // Animation control
+        let animationPaused = false;
+        function toggleAnimation() {
+            const icon = document.getElementById('playIcon');
+            animationPaused = !animationPaused;
+            icon.textContent = animationPaused ? '▶' : '⏸';
+            
+            // This would control the canvas animation
+            if (window.featuredAnimation) {
+                window.featuredAnimation.paused = animationPaused;
+            }
+        }
+    </script>
+</body>
+</html>

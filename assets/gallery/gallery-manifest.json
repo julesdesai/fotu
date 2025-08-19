@@ -1,0 +1,12 @@
+{
+  "images": [
+    "sample1.jpeg",
+    "sample2.jpeg",
+    "sample3.jpeg",
+    "sample4.jpeg",
+    "sample5.jpeg"
+  ],
+  "description": "Digital fabric gallery integration - place fabric/textile images here",
+  "supportedFormats": ["jpg", "jpeg", "png", "webp"],
+  "notes": "Images will be processed through edge detection and integrated into the fabric simulation"
+}

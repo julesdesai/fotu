@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Fabric - FOTU</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/digital-fabric.css">
+</head>
+<body>
+
+    <main class="digital-fabric-main">
+        <section class="fabric-fullscreen">
+            <canvas id="digitalFabricCanvas" class="fullscreen-canvas"></canvas>
+        </section>
+    </main>
+
+    <script src="../js/components/Navbar.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/digitalFabric.js"></script>
+    <script>
+        // Initialize digital fabric on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('digitalFabricCanvas');
+            if (canvas) {
+                new DigitalFabric('digitalFabricCanvas');
+            }
+        });
+    </script>
+</body>
+</html>

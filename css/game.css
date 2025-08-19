@@ -1,0 +1,115 @@
+/* Game Page Styles - Fullscreen */
+
+/* Remove default spacing */
+.game-main {
+    margin: 0;
+    padding: 0;
+}
+
+.game-fullscreen {
+    position: relative;
+    width: 100vw;
+    height: calc(100vh - var(--nav-height));
+    margin-top: var(--nav-height);
+    overflow: hidden;
+}
+
+.game-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: var(--bg-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: var(--bg-dark);
+    image-rendering: pixelated;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .game-fullscreen {
+        height: calc(100vh - var(--nav-height));
+    }
+}
+
+/* CRT Screen Effect */
+@keyframes crtFlicker {
+    0%, 100% { opacity: 1; }
+    98% { opacity: 0.98; }
+}
+
+#gameCanvas {
+    animation: crtFlicker 0.15s infinite linear;
+}
+
+/* Typewriter Instructions Overlay */
+.game-instructions-overlay {
+    position: absolute;
+    bottom: 60px;
+    left: 30px;
+    right: 30px;
+    z-index: 10;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border: 1px solid #00ff00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    max-width: 600px;
+}
+
+.game-instructions-overlay.visible {
+    opacity: 1;
+}
+
+.game-instructions-overlay::before {
+    content: '> ';
+    color: #00ff00;
+}
+
+/* Typewriter cursor */
+.typewriter-cursor {
+    display: inline-block;
+    background-color: #00ff00;
+    width: 3px;
+    height: 1em;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .game-instructions-overlay {
+        bottom: 20px;
+        left: 15px;
+        right: 15px;
+        font-size: 14px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-instructions-overlay {
+        bottom: 15px;
+        left: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 12px;
+    }
+}

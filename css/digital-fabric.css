@@ -1,0 +1,122 @@
+/* Digital Fabric Page Styles */
+
+.digital-fabric-main {
+    margin: 0;
+    padding: 0;
+}
+
+.fabric-fullscreen {
+    position: relative;
+    width: 100vw;
+    height: calc(100vh - var(--nav-height));
+    overflow: hidden;
+    margin-top: var(--nav-height);
+}
+
+.fullscreen-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-dark);
+    z-index: 1;
+}
+
+.fabric-info {
+    position: absolute;
+    top: var(--nav-height);
+    left: var(--spacing-xl);
+    z-index: 10;
+    color: var(--text-light);
+    max-width: 400px;
+}
+
+.fabric-info h1 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-md);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+}
+
+.fabric-info p {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-xl);
+    color: var(--secondary-color);
+}
+
+.fabric-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    background: transparent;
+    border: 1px solid var(--text-light);
+    color: var(--text-light);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.control-btn:hover {
+    background: var(--text-light);
+    color: var(--bg-dark);
+}
+
+.speed-slider {
+    width: 120px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    outline: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.speed-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--text-light);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.speed-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--text-light);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fabric-info {
+        left: var(--spacing-md);
+        right: var(--spacing-md);
+        max-width: none;
+    }
+    
+    .fabric-info h1 {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .fabric-controls {
+        gap: var(--spacing-md);
+    }
+    
+    .control-btn {
+        padding: var(--spacing-xs) var(--spacing-md);
+        font-size: var(--font-size-xs);
+    }
+    
+    .speed-slider {
+        width: 100px;
+    }
+}
