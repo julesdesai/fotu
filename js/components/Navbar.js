@@ -127,13 +127,8 @@ class Navbar {
         // Insert navbar at the beginning of body
         document.body.insertAdjacentHTML('afterbegin', this.getNavHTML());
         
-        // Insert footer at the end of body (before any existing scripts)
-        const scripts = document.querySelectorAll('script');
-        if (scripts.length > 0) {
-            scripts[0].insertAdjacentHTML('beforebegin', this.getFooterHTML());
-        } else {
-            document.body.insertAdjacentHTML('beforeend', this.getFooterHTML());
-        }
+        // Insert footer at the end of body
+        document.body.insertAdjacentHTML('beforeend', this.getFooterHTML());
 
         // Initialize mobile menu functionality
         this.initMobileMenu();
