@@ -1,4 +1,4 @@
-// Navbar Component
+// Navbar Component - Integrated into left typewriter column
 class Navbar {
     constructor() {
         this.currentPage = this.getCurrentPage();
@@ -8,7 +8,7 @@ class Navbar {
     getCurrentPage() {
         const path = window.location.pathname;
         const page = path.split('/').pop().split('.')[0];
-        
+
         // Handle different page names
         if (page === 'index' || page === '' || path.endsWith('/')) {
             return 'home';
@@ -24,47 +24,125 @@ class Navbar {
         return page;
     }
 
-    getNavHTML() {
+    getPaths() {
         const isSubPage = window.location.pathname.includes('/pages/');
-        
-        // Define all paths based on current location
-        let homePath, digitalFabricPath, gamePath, aboutPath, shopPath;
-        
+
         if (isSubPage) {
-            // We're in a subpage, so go up one level for home, stay in same directory for others
-            homePath = '../index.html';
-            digitalFabricPath = 'digital-fabric.html';
-            gamePath = 'game.html';
-            aboutPath = 'about.html';
-            shopPath = 'shop.html';
+            return {
+                home: '../index.html',
+                digitalFabric: 'digital-fabric.html',
+                game: 'game.html',
+                about: 'about.html',
+                shop: 'shop.html'
+            };
         } else {
-            // We're on homepage, so all subpages are in pages/ directory
-            homePath = 'index.html';
-            digitalFabricPath = 'pages/digital-fabric.html';
-            gamePath = 'pages/game.html';
-            aboutPath = 'pages/about.html';
-            shopPath = 'pages/shop.html';
+            return {
+                home: 'index.html',
+                digitalFabric: 'pages/digital-fabric.html',
+                game: 'pages/game.html',
+                about: 'pages/about.html',
+                shop: 'pages/shop.html'
+            };
+        }
+    }
+
+    getNavHTML() {
+        // Return empty - nav is now in the left typewriter column
+        return '';
+    }
+
+    injectNavIntoTypewriter() {
+        const paths = this.getPaths();
+        const isHomePage = this.currentPage === 'home';
+
+        // Check if we're on the home page with existing typewriter columns
+        const leftTypewriter = document.querySelector('.hero-typewriter-left');
+
+        if (leftTypewriter) {
+            // Home page: inject nav into existing typewriter column
+            const navContent = `
+                <div class="typewriter-nav">
+                    <div class="typewriter-brand">FABRIC OF</div>
+                    <div class="typewriter-brand">THE UNIVERSE</div>
+                    <div class="typewriter-divider"></div>
+                    <nav class="typewriter-menu">
+                        <a href="${paths.home}" class="typewriter-link ${this.currentPage === 'home' ? 'active' : ''}">HOME</a>
+                        <a href="${paths.digitalFabric}" class="typewriter-link ${this.currentPage === 'digital-fabric' ? 'active' : ''}">DIGITAL FABRIC</a>
+                        <a href="${paths.game}" class="typewriter-link ${this.currentPage === 'ouroboros-protocol' ? 'active' : ''}">OUROBOROS PROTOCOL</a>
+                        <a href="${paths.about}" class="typewriter-link ${this.currentPage === 'about' ? 'active' : ''}">ABOUT</a>
+                        <a href="${paths.shop}" class="typewriter-link ${this.currentPage === 'shop' ? 'active' : ''}">SHOP</a>
+                    </nav>
+                    <div class="typewriter-divider"></div>
+                </div>
+            `;
+            leftTypewriter.insertAdjacentHTML('afterbegin', navContent);
+        } else {
+            // Other pages: create a fixed sidebar
+            const sidebar = `
+                <aside class="site-sidebar">
+                    <div class="typewriter-nav">
+                        <div class="typewriter-brand">FABRIC OF</div>
+                        <div class="typewriter-brand">THE UNIVERSE</div>
+                        <div class="typewriter-divider"></div>
+                        <nav class="typewriter-menu">
+                            <a href="${paths.home}" class="typewriter-link ${this.currentPage === 'home' ? 'active' : ''}">HOME</a>
+                            <a href="${paths.digitalFabric}" class="typewriter-link ${this.currentPage === 'digital-fabric' ? 'active' : ''}">DIGITAL FABRIC</a>
+                            <a href="${paths.game}" class="typewriter-link ${this.currentPage === 'ouroboros-protocol' ? 'active' : ''}">OUROBOROS PROTOCOL</a>
+                            <a href="${paths.about}" class="typewriter-link ${this.currentPage === 'about' ? 'active' : ''}">ABOUT</a>
+                            <a href="${paths.shop}" class="typewriter-link ${this.currentPage === 'shop' ? 'active' : ''}">SHOP</a>
+                        </nav>
+                    </div>
+                </aside>
+            `;
+            document.body.insertAdjacentHTML('afterbegin', sidebar);
+            document.body.classList.add('has-sidebar');
         }
 
-        return `
-            <nav class="navbar">
-                <div class="nav-container">
-                    <a href="${homePath}" class="nav-brand">FOTU</a>
-                    <ul class="nav-menu">
-                        <li><a href="${homePath}" class="nav-link ${this.currentPage === 'home' ? 'active' : ''}">Home</a></li>
-                        <li><a href="${digitalFabricPath}" class="nav-link ${this.currentPage === 'digital-fabric' ? 'active' : ''}">Digital Fabric</a></li>
-                        <li><a href="${gamePath}" class="nav-link ${this.currentPage === 'ouroboros-protocol' ? 'active' : ''}">Ouroboros Protocol</a></li>
-                        <li><a href="${aboutPath}" class="nav-link ${this.currentPage === 'about' ? 'active' : ''}">About</a></li>
-                        <li><a href="${shopPath}" class="nav-link ${this.currentPage === 'shop' ? 'active' : ''}">Shop</a></li>
-                    </ul>
-                    <div class="hamburger">
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                    </div>
-                </div>
-            </nav>
+        // Mobile nav toggle and overlay (all pages)
+        const mobileNav = `
+            <button class="mobile-nav-toggle">MENU</button>
+            <div class="mobile-nav-overlay">
+                <button class="mobile-nav-close">✕ CLOSE</button>
+                <div class="typewriter-brand">FABRIC OF</div>
+                <div class="typewriter-brand">THE UNIVERSE</div>
+                <nav class="typewriter-menu">
+                    <a href="${paths.home}" class="typewriter-link ${this.currentPage === 'home' ? 'active' : ''}">HOME</a>
+                    <a href="${paths.digitalFabric}" class="typewriter-link ${this.currentPage === 'digital-fabric' ? 'active' : ''}">DIGITAL FABRIC</a>
+                    <a href="${paths.game}" class="typewriter-link ${this.currentPage === 'ouroboros-protocol' ? 'active' : ''}">OUROBOROS PROTOCOL</a>
+                    <a href="${paths.about}" class="typewriter-link ${this.currentPage === 'about' ? 'active' : ''}">ABOUT</a>
+                    <a href="${paths.shop}" class="typewriter-link ${this.currentPage === 'shop' ? 'active' : ''}">SHOP</a>
+                </nav>
+            </div>
         `;
+        document.body.insertAdjacentHTML('afterbegin', mobileNav);
+
+        // Mobile menu toggle functionality
+        this.initMobileMenu();
+    }
+
+    initMobileMenu() {
+        const toggle = document.querySelector('.mobile-nav-toggle');
+        const overlay = document.querySelector('.mobile-nav-overlay');
+        const close = document.querySelector('.mobile-nav-close');
+
+        if (toggle && overlay) {
+            toggle.addEventListener('click', () => {
+                overlay.classList.add('active');
+            });
+
+            if (close) {
+                close.addEventListener('click', () => {
+                    overlay.classList.remove('active');
+                });
+            }
+
+            // Close on link click
+            overlay.querySelectorAll('.typewriter-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    overlay.classList.remove('active');
+                });
+            });
+        }
     }
 
     getFooterHTML() {
@@ -124,34 +202,11 @@ class Navbar {
     }
 
     init() {
-        // Insert navbar at the beginning of body
-        document.body.insertAdjacentHTML('afterbegin', this.getNavHTML());
-        
         // Insert footer at the end of body
         document.body.insertAdjacentHTML('beforeend', this.getFooterHTML());
 
-        // Initialize mobile menu functionality
-        this.initMobileMenu();
-    }
-
-    initMobileMenu() {
-        const hamburger = document.querySelector('.hamburger');
-        const navMenu = document.querySelector('.nav-menu');
-
-        if (hamburger && navMenu) {
-            hamburger.addEventListener('click', () => {
-                hamburger.classList.toggle('active');
-                navMenu.classList.toggle('active');
-            });
-
-            // Close mobile menu when clicking on nav links
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', () => {
-                    hamburger.classList.remove('active');
-                    navMenu.classList.remove('active');
-                });
-            });
-        }
+        // Inject nav into left typewriter column
+        this.injectNavIntoTypewriter();
     }
 }
 

@@ -85,79 +85,146 @@ p {
     padding: 0 var(--spacing-lg);
 }
 
-/* Navigation */
-.navbar {
+/* Site Sidebar Navigation */
+.site-sidebar {
     position: fixed;
     top: 0;
-    width: 100%;
-    height: var(--nav-height);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-color);
+    left: 0;
+    width: 200px;
+    height: 100vh;
+    background-color: var(--bg-light);
+    border-right: 1px solid var(--border-color);
+    z-index: 100;
+    padding: var(--spacing-sm);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    overflow: hidden;
+}
+
+/* Adjust body content when sidebar is present */
+body.has-sidebar {
+    padding-left: 200px;
+}
+
+body.has-sidebar main {
+    margin-top: 0;
+}
+
+/* Typewriter Nav Styles (shared across all pages) */
+.typewriter-nav {
+    margin-bottom: var(--spacing-lg);
+}
+
+.typewriter-brand {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: rgba(30, 30, 30, 0.9);
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.typewriter-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.15);
+    margin: var(--spacing-sm) 0;
+}
+
+.typewriter-menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.typewriter-link {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(60, 60, 60, 0.8);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 2px 0;
+}
+
+.typewriter-link:hover {
+    color: rgba(0, 0, 0, 1);
+}
+
+.typewriter-link.active {
+    color: rgba(0, 0, 0, 1);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Mobile Navigation */
+.mobile-nav-toggle {
+    display: none;
+    position: fixed;
+    top: var(--spacing-md);
+    left: var(--spacing-md);
     z-index: 1000;
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
 }
 
-.nav-container {
-    max-width: var(--container-max-width);
-    margin: 0 auto;
-    padding: 0 var(--spacing-lg);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-}
-
-.nav-brand {
-    font-size: var(--font-size-2xl);
-    font-weight: 300;
-    color: var(--text-dark);
-    text-decoration: none;
-    letter-spacing: -0.02em;
-}
-
-.nav-menu {
-    display: flex;
-    list-style: none;
-    gap: var(--spacing-xl);
-}
-
-.nav-link {
-    color: var(--text-dark);
-    text-decoration: none;
-    transition: var(--transition);
-    position: relative;
-    font-weight: 300;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: var(--text-dark);
-    opacity: 0.6;
-}
-
-.nav-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
+.mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
     left: 0;
     width: 100%;
-    height: 1px;
-    background: var(--text-dark);
-}
-
-/* Hamburger Menu */
-.hamburger {
-    display: none;
+    height: 100%;
+    background: var(--bg-light);
+    z-index: 999;
+    padding: var(--spacing-xl);
     flex-direction: column;
-    cursor: pointer;
-    gap: 4px;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-lg);
 }
 
-.bar {
-    width: 25px;
-    height: 3px;
-    background: var(--primary-color);
-    transition: var(--transition);
+.mobile-nav-overlay.active {
+    display: flex;
+}
+
+.mobile-nav-overlay .typewriter-brand {
+    font-size: 16px;
+    text-align: center;
+}
+
+.mobile-nav-overlay .typewriter-menu {
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.mobile-nav-overlay .typewriter-link {
+    font-size: 14px;
+}
+
+.mobile-nav-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    background: none;
+    border: none;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 /* Buttons */
@@ -257,36 +324,16 @@ p {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .nav-menu {
-        position: fixed;
-        left: -100%;
-        top: var(--nav-height);
-        flex-direction: column;
-        background: rgba(0, 0, 0, 0.95);
-        width: 100%;
-        text-align: center;
-        transition: var(--transition);
-        padding: var(--spacing-lg) 0;
+    .site-sidebar {
+        display: none;
     }
 
-    .nav-menu.active {
-        left: 0;
+    body.has-sidebar {
+        padding-left: 0;
     }
 
-    .hamburger {
-        display: flex;
-    }
-
-    .hamburger.active .bar:nth-child(2) {
-        opacity: 0;
-    }
-
-    .hamburger.active .bar:nth-child(1) {
-        transform: translateY(7px) rotate(45deg);
-    }
-
-    .hamburger.active .bar:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg);
+    .mobile-nav-toggle {
+        display: block;
     }
 
     .container {

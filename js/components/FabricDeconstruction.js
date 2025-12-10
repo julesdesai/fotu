@@ -2,30 +2,34 @@
 class FabricDeconstruction {
     constructor() {
         this.canvas = document.getElementById('fabricCanvas');
-        this.heroImage = document.getElementById('heroImage');
+        this.morphCanvas = document.getElementById('morphCanvas');
         this.heroContainer = document.querySelector('.hero-image');
-        
-        if (!this.canvas || !this.heroImage || !this.heroContainer) {
+
+        if (!this.canvas || !this.morphCanvas || !this.heroContainer) {
             console.log('Fabric deconstruction elements not found');
             return;
         }
         
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
         this.isActive = false;
         this.mouseX = 0;
         this.mouseY = 0;
         
-        // Deconstruction parameters
+        // Deconstruction parameters - optimized for performance
         this.threads = [];
         this.holes = [];
         this.imagePixels = [];
         this.distortionFields = [];
-        this.deconstructionRadius = 100;
-        this.threadDensity = 12;
+        this.deconstructionRadius = 80; // Reduced radius
+        this.threadDensity = 8; // Fewer segments per thread
         this.animationSpeed = 0.05;
-        this.fadeSpeed = 0.015;
-        this.maxThreads = 40;
+        this.fadeSpeed = 0.025; // Faster fade for cleanup
+        this.maxThreads = 20; // Reduced max threads
+        this.maxPixels = 30; // Limit flying pixels
+        this.maxHoles = 8; // Fewer holes
         this.imageLoaded = false;
+        this.lastCreationTime = 0; // For throttling
+        this.creationCooldown = 100; // ms between creations
         
         this.init();
     }
@@ -52,34 +56,31 @@ class FabricDeconstruction {
     }
     
     loadImageData() {
-        // Wait for image to load, then sample its data
-        if (this.heroImage.complete) {
+        // Sample from morph canvas after a short delay to let it initialize
+        setTimeout(() => {
             this.sampleImageData();
-        } else {
-            this.heroImage.addEventListener('load', () => {
-                this.sampleImageData();
-            });
-        }
+        }, 1000);
+
+        // Re-sample periodically to keep colors in sync with morphing gallery
+        setInterval(() => {
+            this.sampleImageData();
+        }, 2000);
     }
-    
+
     sampleImageData() {
-        // Create a temporary canvas to sample image data
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        
+        // Sample directly from the morph canvas
         const rect = this.heroContainer.getBoundingClientRect();
-        tempCanvas.width = rect.width;
-        tempCanvas.height = rect.height;
-        
-        // Draw the image to get pixel data
-        tempCtx.drawImage(this.heroImage, 0, 0, rect.width, rect.height);
-        
+        const sampleWidth = Math.min(this.morphCanvas.width || rect.width, 800);
+        const sampleHeight = Math.min(this.morphCanvas.height || rect.height, 600);
+
         try {
-            this.imageData = tempCtx.getImageData(0, 0, rect.width, rect.height);
+            const morphCtx = this.morphCanvas.getContext('2d', { willReadFrequently: true });
+            this.imageData = morphCtx.getImageData(0, 0, sampleWidth, sampleHeight);
+            this.imageWidth = sampleWidth;
+            this.imageHeight = sampleHeight;
             this.imageLoaded = true;
         } catch (e) {
-            // Handle CORS issues with external images
-            console.log('Could not sample image data due to CORS policy');
+            console.log('Could not sample morph canvas:', e.message);
             this.imageLoaded = false;
         }
     }
@@ -108,16 +109,20 @@ class FabricDeconstruction {
     }
     
     createDeconstructionThreads() {
-        // Throttle thread creation for performance
-        if (Math.random() > 0.3) return;
+        // Improved throttling for better performance
+        const now = Date.now();
+        if (now - this.lastCreationTime < this.creationCooldown) return;
+        if (Math.random() > 0.4) return; // Reduced creation frequency
         
-        // Create image disintegration effects
-        this.createDistortionField();
-        this.createImagePixels();
-        this.createFabricHole();
+        this.lastCreationTime = now;
         
-        // Create threads radiating from mouse position
-        const numThreads = Math.random() * 6 + 3;
+        // Create fewer effects for better performance
+        if (Math.random() < 0.3) this.createDistortionField();
+        if (Math.random() < 0.4) this.createImagePixels();
+        if (Math.random() < 0.2) this.createFabricHole();
+        
+        // Create fewer threads radiating from mouse position
+        const numThreads = Math.random() * 3 + 2; // Reduced from 6+3 to 3+2
         
         for (let i = 0; i < numThreads; i++) {
             const angle = (Math.PI * 2 / numThreads) * i + Math.random() * 0.5;
@@ -184,10 +189,10 @@ class FabricDeconstruction {
     }
     
     createImagePixels() {
-        // Create flying image pixels that separate from the main image
-        if (!this.imageLoaded || Math.random() > 0.15) return;
+        // Create fewer flying image pixels for better performance
+        if (!this.imageLoaded) return;
         
-        const numPixels = Math.random() * 20 + 10;
+        const numPixels = Math.random() * 8 + 4; // Reduced from 20+10 to 8+4
         
         for (let i = 0; i < numPixels; i++) {
             const offsetX = (Math.random() - 0.5) * 60;
@@ -215,9 +220,9 @@ class FabricDeconstruction {
             });
         }
         
-        // Limit image pixels
-        if (this.imagePixels.length > 100) {
-            this.imagePixels = this.imagePixels.slice(-100);
+        // Limit image pixels for performance
+        if (this.imagePixels.length > this.maxPixels) {
+            this.imagePixels = this.imagePixels.slice(-this.maxPixels);
         }
     }
     
@@ -236,29 +241,37 @@ class FabricDeconstruction {
         this.holes.push(hole);
         
         // Limit holes for performance
-        if (this.holes.length > 15) {
-            this.holes = this.holes.slice(-15);
+        if (this.holes.length > this.maxHoles) {
+            this.holes = this.holes.slice(-this.maxHoles);
         }
     }
     
     getImageColorAt(x, y) {
         if (!this.imageLoaded || !this.imageData) return null;
         
-        const pixelX = Math.floor(x);
-        const pixelY = Math.floor(y);
+        // Scale coordinates to match sampled image dimensions
+        const rect = this.heroContainer.getBoundingClientRect();
+        const scaleX = this.imageWidth / rect.width;
+        const scaleY = this.imageHeight / rect.height;
         
-        if (pixelX < 0 || pixelX >= this.canvas.width || pixelY < 0 || pixelY >= this.canvas.height) {
+        const pixelX = Math.floor(x * scaleX);
+        const pixelY = Math.floor(y * scaleY);
+        
+        if (pixelX < 0 || pixelX >= this.imageWidth || pixelY < 0 || pixelY >= this.imageHeight) {
             return null;
         }
         
-        const index = (pixelY * this.canvas.width + pixelX) * 4;
+        const index = (pixelY * this.imageWidth + pixelX) * 4;
         const data = this.imageData.data;
         
+        // Ensure we don't read beyond array bounds
+        if (index + 3 >= data.length) return null;
+        
         return {
-            r: data[index],
-            g: data[index + 1],
-            b: data[index + 2],
-            a: data[index + 3] / 255
+            r: data[index] || 0,
+            g: data[index + 1] || 0,
+            b: data[index + 2] || 0,
+            a: (data[index + 3] || 255) / 255
         };
     }
     

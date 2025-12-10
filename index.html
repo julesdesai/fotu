@@ -11,22 +11,20 @@
 
     <main>
         <section class="hero-fullscreen">
+            <div class="hero-typewriter-left"></div>
+            <div class="hero-typewriter-right"></div>
             <div class="hero-image">
-                <img src="assets/images/home1.png" alt="FOTU Hero" class="hero-background" id="heroImage">
+                <canvas id="morphCanvas" class="morph-gallery-canvas"></canvas>
                 <canvas id="fabricCanvas" class="fabric-deconstruction-canvas"></canvas>
             </div>
             <div class="hero-overlay">
-                <h1>FOTU</h1>
-                <p>fabric of the universe</p>
-                
+                <!-- FOTU text now rendered as negative space in particle gallery -->
             </div>
         </section>
 
         <section class="scrolling-banner">
             <div class="banner-container">
-                <div class="banner-text">
-                    THE FABRIC OF THE UNIVERSE IS STITCHED TOGETHER WITH THE THREADS OF OUR OWN MAKING // FOTU is a wearable fine art project in motion, tracing the same patterns in nature, bodies, and baselines. Fluid, instinctive, and impossible to pin down. Each piece is a fragment of the bigger pattern: designed to move and built to feel. // THE FABRIC OF THE UNIVERSE IS STITCHED TOGETHER WITH THE THREADS OF OUR OWN MAKING // FOTU is a wearable fine art project in motion, tracing the same patterns in nature, bodies, and baselines. Fluid, instinctive, and impossible to pin down. Each piece is a fragment of the bigger pattern: designed to move and built to feel. //
-                </div>
+                <div class="banner-text"></div>
             </div>
         </section>
 
@@ -70,9 +68,10 @@
 
 
     <script src="js/components/Navbar.js"></script>
+    <script src="js/components/ImageMorphGallery.js"></script>
     <script src="js/components/FabricDeconstruction.js"></script>
-    <script src="js/components/TextDeconstruction.js"></script>
-    <script src="js/components/HangingLetters.js"></script>
+    <script src="js/components/HeroTypewriters.js"></script>
+    <script src="js/components/TypewriterBanner.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

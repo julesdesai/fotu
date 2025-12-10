@@ -13,10 +13,11 @@ main section {
 /* Hero Fullscreen Section */
 .hero-fullscreen {
     position: relative;
-    height: calc(100vh - 80px);
+    height: 100vh;
     width: 100vw;
     overflow: hidden;
     margin-bottom: 0;
+    margin-top: 0;
 }
 
 .hero-image {
@@ -26,24 +27,21 @@ main section {
     width: 100%;
     height: 100%;
     z-index: 1;
+    /* Ensure proper stacking context for ::before overlay */
+    isolation: isolate;
 }
 
-.hero-background {
+.morph-gallery-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    object-position: center;
-    display: block;
-    transition: filter 0.3s ease;
+    z-index: 1;
+    background: #f5f5f5;
 }
 
-.hero-image:hover .hero-background {
-    filter: blur(0.5px) contrast(1.1) saturate(0.9);
-}
-
-.hero-image.deconstructing .hero-background {
-    filter: blur(1px) contrast(1.2) saturate(0.8) brightness(1.05);
-}
+/* No CSS overlay needed - loading animation is on canvas */
 
 .fabric-deconstruction-canvas {
     position: absolute;
@@ -80,12 +78,12 @@ main section {
 
 /* Hanging Letters */
 .hero-overlay h1.hanging-mode {
-    opacity: 0 !important;
+    visibility: hidden !important;
     pointer-events: none;
 }
 
 .hanging-letter {
-    position: fixed;
+    position: absolute;
     top: 0;
     font-size: inherit;
     font-weight: inherit;
@@ -114,7 +112,7 @@ main section {
 }
 
 .hanging-thread {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 50%;
     width: 2px;
@@ -132,16 +130,16 @@ main section {
 
 @keyframes hangingSwing {
     0%, 100% {
-        transform: rotate(0deg) translateY(0px);
+        transform: translateX(-50%) rotate(0deg) translateY(0px);
     }
     25% {
-        transform: rotate(3deg) translateY(8px) scale(1.02);
+        transform: translateX(-50%) rotate(3deg) translateY(8px) scale(1.02);
     }
     50% {
-        transform: rotate(0deg) translateY(5px);
+        transform: translateX(-50%) rotate(0deg) translateY(5px);
     }
     75% {
-        transform: rotate(-2deg) translateY(6px) scale(0.98);
+        transform: translateX(-50%) rotate(-2deg) translateY(6px) scale(0.98);
     }
 }
 
@@ -211,44 +209,110 @@ main section {
     letter-spacing: 0.1em;
 }
 
-/* Scrolling Banner */
+/* Hero Typewriter Overlay */
+.hero-typewriter-left,
+.hero-typewriter-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 200px;
+    height: 100%;
+    background-color: var(--bg-light);
+    color: rgba(60, 60, 60, 0.7);
+    z-index: 5;
+    padding: var(--spacing-sm);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow: hidden;
+}
+
+.hero-typewriter-left {
+    left: 0;
+    border-right: 1px solid var(--border-color);
+}
+
+.hero-typewriter-right {
+    right: 0;
+    border-left: 1px solid var(--border-color);
+}
+
+.hero-typewriter-left strong,
+.hero-typewriter-right strong {
+    color: rgba(50, 50, 50, 0.8);
+    font-weight: 500;
+}
+
+/* Typewriter nav styles are now in main.css for all pages */
+
+/* Typewriter Banner */
 .scrolling-banner {
     background-color: var(--bg-light);
     color: var(--text-dark);
-    padding: var(--spacing-lg) 0;
+    padding: 0;
     overflow: hidden;
     position: relative;
     border-bottom: 1px solid var(--border-color);
     margin-top: 0;
-    height: 80px;
+    min-height: 160px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .banner-container {
     width: 100%;
-    overflow: hidden;
+    height: 100%;
     position: relative;
+    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-xs) var(--spacing-md);
 }
 
 .banner-text {
-    display: inline-block;
-    font-size: var(--font-size-sm);
-    font-weight: 300;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 400;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-    will-change: transform;
-    animation: scroll-horizontal 50s linear infinite;
-    padding-left: 100vw;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    white-space: pre-wrap;
+    word-break: break-all;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-font-smoothing: subpixel-antialiased;
+    width: 100%;
+    position: relative;
 }
 
-@keyframes scroll-horizontal {
-    0% {
-        transform: translateX(0);
+/* Sewing Machine Cursor */
+.sewing-cursor {
+    position: absolute;
+    width: 2px;
+    height: 16px;
+    background-color: var(--text-dark);
+    animation: sewingMachine 0.8s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes sewingMachine {
+    0%, 100% {
+        transform: translateY(0px) scaleY(1);
+        opacity: 1;
     }
-    100% {
-        transform: translateX(-100%);
+    25% {
+        transform: translateY(-3px) scaleY(0.8);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateY(0px) scaleY(1.1);
+        opacity: 1;
+    }
+    75% {
+        transform: translateY(2px) scaleY(0.9);
+        opacity: 0.9;
     }
 }
 
@@ -459,8 +523,19 @@ main section {
     }
 }
 
+/* Mobile nav styles are now in main.css for all pages */
+
 /* Responsive Design */
 @media (max-width: 768px) {
+    .mobile-nav-toggle {
+        display: block;
+    }
+
+    .hero-typewriter-left,
+    .hero-typewriter-right {
+        display: none;
+    }
+    
     .hero-overlay h1 {
         font-size: clamp(2rem, 12vw, 4rem);
     }
@@ -477,7 +552,7 @@ main section {
     }
     
     .hero-fullscreen {
-        height: calc(100vh - 60px);
+        height: 100vh;
     }
     
     .scrolling-banner {
@@ -487,7 +562,7 @@ main section {
     
     .banner-text {
         font-size: var(--font-size-xs);
-        animation: scroll-horizontal 40s linear infinite;
+        animation: scroll-horizontal 60s linear infinite;
     }
     
     .concept-content {
