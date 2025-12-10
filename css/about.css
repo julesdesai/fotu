@@ -1,7 +1,7 @@
 /* About Page Specific Styles */
 
 .about-main {
-    padding-top: var(--nav-height);
+    padding-top: 0;
 }
 
 /* Hero Section */

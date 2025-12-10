@@ -9,8 +9,8 @@
 .game-fullscreen {
     position: relative;
     width: 100vw;
-    height: calc(100vh - var(--nav-height));
-    margin-top: var(--nav-height);
+    height: 100vh;
+    margin-top: 0;
     overflow: hidden;
 }
 
@@ -35,7 +35,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .game-fullscreen {
-        height: calc(100vh - var(--nav-height));
+        height: 100vh;
     }
 }
 
