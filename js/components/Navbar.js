@@ -16,8 +16,8 @@ class Navbar {
       return "digital-fabric";
     } else if (page === "game") {
       return "ouroboros-protocol";
-    } else if (page === "about") {
-      return "about";
+    } else if (page === "roots") {
+      return "roots";
     } else if (page === "shop") {
       return "shop";
     }
@@ -32,7 +32,7 @@ class Navbar {
         home: "../index.html",
         digitalFabric: "digital-fabric.html",
         game: "game.html",
-        about: "about.html",
+        roots: "roots.html",
         shop: "shop.html",
       };
     } else {
@@ -40,7 +40,7 @@ class Navbar {
         home: "index.html",
         digitalFabric: "pages/digital-fabric.html",
         game: "pages/game.html",
-        about: "pages/about.html",
+        roots: "pages/roots.html",
         shop: "pages/shop.html",
       };
     }
@@ -69,7 +69,7 @@ class Navbar {
                         <a href="${paths.home}" class="typewriter-link ${this.currentPage === "home" ? "active" : ""}">HOME</a>
                         <a href="${paths.digitalFabric}" class="typewriter-link ${this.currentPage === "digital-fabric" ? "active" : ""}">DIGITAL FABRIC</a>
                         <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
-                        <a href="${paths.about}" class="typewriter-link ${this.currentPage === "about" ? "active" : ""}">ABOUT</a>
+                        <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                         <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
                         <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
                     </nav>
@@ -89,7 +89,7 @@ class Navbar {
                             <a href="${paths.home}" class="typewriter-link ${this.currentPage === "home" ? "active" : ""}">HOME</a>
                             <a href="${paths.digitalFabric}" class="typewriter-link ${this.currentPage === "digital-fabric" ? "active" : ""}">DIGITAL FABRIC</a>
                             <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
-                            <a href="${paths.about}" class="typewriter-link ${this.currentPage === "about" ? "active" : ""}">ABOUT</a>
+                            <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                             <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
                             <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
                         </nav>
@@ -111,7 +111,7 @@ class Navbar {
                     <a href="${paths.home}" class="typewriter-link ${this.currentPage === "home" ? "active" : ""}">HOME</a>
                     <a href="${paths.digitalFabric}" class="typewriter-link ${this.currentPage === "digital-fabric" ? "active" : ""}">DIGITAL FABRIC</a>
                     <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
-                    <a href="${paths.about}" class="typewriter-link ${this.currentPage === "about" ? "active" : ""}">ABOUT</a>
+                    <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                     <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
                     <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
                 </nav>
@@ -160,18 +160,22 @@ class Navbar {
   }
 
   bindCartLinks() {
-    const links = document.querySelectorAll('[data-cart-link]');
+    const links = document.querySelectorAll("[data-cart-link]");
     const refresh = (qty) => {
-      const label = qty > 0 ? `CART (${qty})` : 'CART';
-      links.forEach((a) => { a.textContent = label; });
+      const label = qty > 0 ? `CART (${qty})` : "CART";
+      links.forEach((a) => {
+        a.textContent = label;
+      });
     };
     links.forEach((a) => {
-      a.addEventListener('click', (e) => {
+      a.addEventListener("click", (e) => {
         e.preventDefault();
-        window.dispatchEvent(new CustomEvent('cart:open'));
+        window.dispatchEvent(new CustomEvent("cart:open"));
       });
     });
-    window.addEventListener('cart:updated', (e) => refresh(e.detail.totalQuantity || 0));
+    window.addEventListener("cart:updated", (e) =>
+      refresh(e.detail.totalQuantity || 0),
+    );
     if (window.Cart) refresh(window.Cart?.state?.totalQuantity ?? 0);
   }
 
