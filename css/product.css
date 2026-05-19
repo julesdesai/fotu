@@ -1,0 +1,85 @@
+.product-main {
+    min-height: 100vh;
+    padding: var(--spacing-xl) 0;
+}
+
+.product-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2xl);
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    min-height: 80vh;
+    align-items: start;
+}
+
+.product-gallery {
+    width: 100%;
+}
+
+.product-image-main {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-gray);
+}
+
+.product-details {
+    padding: var(--spacing-lg) 0;
+}
+
+.product-title {
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-md);
+}
+
+.product-price {
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    margin-bottom: var(--spacing-xl);
+}
+
+.product-description {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-xl);
+}
+
+.product-description p {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.product-back {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.product-back:hover {
+    color: var(--text-dark);
+}
+
+@media (max-width: 768px) {
+    .product-layout {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-md);
+    }
+}

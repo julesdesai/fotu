@@ -1,77 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOTU - Fabric of the Universe</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/home.css">
-</head>
-<body>
-
-    <main>
-        <section class="hero-fullscreen">
-            <div class="hero-typewriter-left"></div>
-            <div class="hero-typewriter-right"></div>
-            <div class="hero-image">
-                <canvas id="morphCanvas" class="morph-gallery-canvas"></canvas>
-                <canvas id="fabricCanvas" class="fabric-deconstruction-canvas"></canvas>
-            </div>
-            <div class="hero-overlay">
-                <!-- FOTU text now rendered as negative space in particle gallery -->
-            </div>
-        </section>
-
-        <section class="scrolling-banner">
-            <div class="banner-container">
-                <div class="banner-text"></div>
-            </div>
-        </section>
-
-        <section class="concept-section">
-            <div class="concept-content">
-                <div class="concept-text">
-                    <h2>digital materiality</h2>
-                    <p>we investigate the boundaries between physical and digital realms through computational textile design. each piece emerges from algorithmic processes that mirror natural phenomena.</p>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FOTU - Fabric of the Universe</title>
+        <link rel="stylesheet" href="css/main.css" />
+        <link rel="stylesheet" href="css/home.css" />
+    </head>
+    <body>
+        <main>
+            <section class="hero-fullscreen">
+                <div class="hero-typewriter-left"></div>
+                <div class="hero-typewriter-right"></div>
+                <div class="hero-image">
+                    <video
+                        class="morph-gallery-video"
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                        preload="auto"
+                    >
+                        <source
+                            src="assets/gallery/hero-gallery.mp4"
+                            type="video/mp4"
+                        />
+                    </video>
                 </div>
-                <div class="concept-image">
-                    <div class="placeholder-image"></div>
+                <div class="hero-overlay">
+                    <!-- FOTU text now rendered as negative space in particle gallery -->
                 </div>
-            </div>
-        </section>
+                <div class="hero-credit">
+                    <p>
+                        Website by Sea Elegans<br />in collaboration with FOTU
+                    </p>
+                    <p>&copy; FOTU 2026</p>
+                </div>
+            </section>
+        </main>
 
-        <section class="gallery-section">
-            <div class="gallery-grid">
-                <div class="gallery-item large">
-                    <div class="gallery-image"></div>
-                    <div class="gallery-info">
-                        <h3>neural pathways</h3>
-                        <p>synaptic textile</p>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <div class="gallery-image"></div>
-                </div>
-                <div class="gallery-item">
-                    <div class="gallery-image"></div>
-                </div>
-                <div class="gallery-item wide">
-                    <div class="gallery-image"></div>
-                    <div class="gallery-info">
-                        <h3>quantum threads</h3>
-                        <p>probability weave</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+        <script src="js/components/Navbar.js"></script>
 
-
-    <script src="js/components/Navbar.js"></script>
-    <script src="js/components/ImageMorphGallery.js"></script>
-    <script src="js/components/FabricDeconstruction.js"></script>
-    <script src="js/components/HeroTypewriters.js"></script>
-    <script src="js/components/TypewriterBanner.js"></script>
-    <script src="js/main.js"></script>
-</body>
+        <script src="js/components/HeroTypewriters.js"></script>
+        <script src="js/main.js"></script>
+    </body>
 </html>
