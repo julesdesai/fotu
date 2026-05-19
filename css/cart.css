@@ -1,0 +1,328 @@
+/* Cart drawer overlay + panel */
+.cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    z-index: 998;
+    pointer-events: none;
+    transition: background 0.25s ease;
+}
+
+.cart-overlay.is-open {
+    background: rgba(0, 0, 0, 0.25);
+    pointer-events: auto;
+}
+
+.cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 420px;
+    max-width: 100%;
+    height: 100vh;
+    background: var(--bg-light);
+    border-left: 1px solid var(--border-color);
+    z-index: 999;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    font-family: "Courier New", monospace;
+}
+
+.cart-drawer.is-open {
+    transform: translateX(0);
+}
+
+.cart-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cart-drawer-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cart-drawer-close {
+    background: none;
+    border: none;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.cart-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+}
+
+.cart-empty {
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-md);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.cart-line {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cart-line-image {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+    background: var(--bg-gray);
+    display: block;
+}
+
+.cart-line-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cart-line-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dark);
+    text-decoration: none;
+}
+
+.cart-line-variant {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.cart-line-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.cart-qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+}
+
+.cart-qty button {
+    background: none;
+    border: none;
+    width: 26px;
+    height: 26px;
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.cart-qty button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.cart-qty-value {
+    min-width: 24px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.cart-line-price {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.cart-line-remove {
+    background: none;
+    border: none;
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    margin-top: 4px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    align-self: flex-start;
+}
+
+.cart-line-remove:hover {
+    color: var(--text-dark);
+}
+
+.cart-drawer-footer {
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-md);
+}
+
+.cart-subtotal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.cart-subtotal-amount {
+    font-size: 13px;
+}
+
+.cart-checkout-button {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--text-dark);
+    color: var(--bg-light);
+    border: none;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.cart-checkout-button:hover { opacity: 0.85; }
+.cart-checkout-button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.cart-footer-note {
+    text-align: center;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: var(--spacing-sm);
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+}
+
+body.cart-open { overflow: hidden; }
+
+/* Variant picker + qty stepper on product page */
+.product-options {
+    margin-bottom: var(--spacing-lg);
+    font-family: "Courier New", monospace;
+}
+
+.product-option {
+    margin-bottom: var(--spacing-md);
+}
+
+.product-option-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-xs);
+    display: block;
+}
+
+.product-option-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+}
+
+.product-option-value {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-light);
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.product-option-value.is-selected {
+    background: var(--text-dark);
+    color: var(--bg-light);
+    border-color: var(--text-dark);
+}
+
+.product-option-value:hover { border-color: var(--text-dark); }
+
+.product-qty {
+    margin-bottom: var(--spacing-lg);
+}
+
+.product-qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+}
+
+.product-qty-stepper button {
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.product-qty-stepper button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.product-qty-value {
+    min-width: 32px;
+    text-align: center;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.product-add-to-cart {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    padding: var(--spacing-md);
+    background: var(--text-dark);
+    color: var(--bg-light);
+    border: none;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    margin-bottom: var(--spacing-md);
+}
+
+.product-add-to-cart:hover { opacity: 0.85; }
+.product-add-to-cart:disabled { opacity: 0.4; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+    .cart-drawer { width: 100%; border-left: none; }
+}
