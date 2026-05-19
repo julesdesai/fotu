@@ -34,7 +34,7 @@ export default async function handler(req, res) {
                 },
                 body: JSON.stringify({
                     query: `{
-                        products(first: 50) {
+                        products(first: 250) {
                             edges {
                                 node {
                                     id
