@@ -29,7 +29,7 @@ class Navbar {
 
     if (isSubPage) {
       return {
-        home: "../index.html",
+        home: "/",
         digitalFabric: "digital-fabric.html",
         game: "game.html",
         roots: "roots.html",
@@ -37,7 +37,7 @@ class Navbar {
       };
     } else {
       return {
-        home: "index.html",
+        home: "/",
         digitalFabric: "pages/digital-fabric.html",
         game: "pages/game.html",
         roots: "pages/roots.html",
