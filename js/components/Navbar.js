@@ -78,7 +78,7 @@ class Navbar {
             `;
       leftTypewriter.insertAdjacentHTML("afterbegin", navContent);
     } else {
-      // Other pages: create a fixed sidebar
+      // Other pages: create a fixed sidebar that mirrors the home-page typewriter column structure
       const sidebar = `
                 <aside class="site-sidebar">
                     <div class="typewriter-nav">
@@ -93,6 +93,7 @@ class Navbar {
                             <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
                             <a href="#" class="typewriter-link" data-basket-link aria-haspopup="dialog">BASKET</a>
                         </nav>
+                        <div class="typewriter-divider"></div>
                     </div>
                 </aside>
             `;
@@ -182,7 +183,7 @@ class Navbar {
   init() {
     const isHomepage =
       document.querySelector(".hero-fullscreen") &&
-      !document.querySelector(".about-main");
+      !document.querySelector(".roots-main");
     if (!isHomepage) {
       document.body.insertAdjacentHTML("beforeend", this.getFooterHTML());
     }

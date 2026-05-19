@@ -1,6 +1,6 @@
-// About page canvas visualization
+// Roots page canvas visualization
 
-class AboutCanvas {
+class RootsCanvas {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
@@ -217,10 +217,10 @@ class AboutCanvas {
     }
 }
 
-// Initialize about canvas when page loads
+// Initialize roots canvas when page loads
 window.addEventListener('load', () => {
-    const aboutCanvas = document.getElementById('aboutCanvas');
-    if (aboutCanvas) {
-        new AboutCanvas('aboutCanvas');
+    const rootsCanvas = document.getElementById('rootsCanvas');
+    if (rootsCanvas) {
+        new RootsCanvas('rootsCanvas');
     }
 });

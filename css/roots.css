@@ -1,19 +1,20 @@
-/* About Page */
+/* Roots Page */
 
-.about-main {
+.roots-main {
     padding-top: 0;
     background: var(--bg-light);
     color: var(--text-dark);
 }
 
 /* Hero */
-.hero-about {
+.hero-roots {
     padding: var(--spacing-3xl) 0;
     text-align: center;
     border-bottom: 1px solid var(--border-color);
 }
 
 .hero-subtitle {
+    font-family: "Courier New", monospace;
     font-size: var(--font-size-lg);
     color: rgba(60, 60, 60, 0.7);
     max-width: 600px;
@@ -34,17 +35,22 @@
 }
 
 .story-text h2 {
-    font-weight: 100;
-    text-transform: lowercase;
-    letter-spacing: -0.02em;
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin-bottom: var(--spacing-lg);
     color: var(--text-dark);
 }
 
 .story-text p {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
     margin-bottom: var(--spacing-lg);
     color: rgba(60, 60, 60, 0.8);
     line-height: 1.7;
+    letter-spacing: 0.02em;
 }
 
 .story-visual {
@@ -52,7 +58,7 @@
     height: 400px;
 }
 
-.about-canvas {
+.roots-canvas {
     width: 100%;
     height: 100%;
     border: 1px solid var(--border-color);
@@ -71,7 +77,7 @@
         order: -1;
     }
 
-    .hero-about,
+    .hero-roots,
     .story {
         padding: var(--spacing-2xl) 0;
     }

@@ -54,7 +54,7 @@ class FOTU {
         }, observerOptions);
 
         // Observe elements that should animate in
-        document.querySelectorAll('.feature-card, .preview-item, .about-item').forEach(el => {
+        document.querySelectorAll('.feature-card, .preview-item, .roots-item').forEach(el => {
             observer.observe(el);
         });
     }
