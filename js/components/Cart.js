@@ -43,8 +43,13 @@
             const totalQuantity = this.lines.reduce((s, l) => s + l.quantity, 0);
             const subtotal = this.lines.reduce((s, l) => s + parseFloat(l.price.amount) * l.quantity, 0);
             const currencyCode = this.lines[0]?.price?.currencyCode || 'GBP';
+            const lines = this.lines.map((l) => ({
+                ...l,
+                price: { ...l.price },
+                image: l.image ? { ...l.image } : null,
+            }));
             return {
-                lines: this.lines,
+                lines,
                 totalQuantity,
                 subtotal: { amount: subtotal.toFixed(2), currencyCode },
             };
@@ -57,6 +62,11 @@
         addLine(snapshot) {
             // snapshot: { variantId, quantity, title, variantTitle, price: {amount, currencyCode}, image?, handle }
             if (!snapshot || !snapshot.variantId) return;
+            const rawAmount = parseFloat(snapshot.price?.amount);
+            const safePrice = {
+                amount: isNaN(rawAmount) ? '0.00' : rawAmount.toFixed(2),
+                currencyCode: snapshot.price?.currencyCode || 'GBP',
+            };
             const existing = this.lines.find((l) => l.variantId === snapshot.variantId);
             if (existing) {
                 existing.quantity = this._clampQty(existing.quantity + (snapshot.quantity || 1));
@@ -66,7 +76,7 @@
                     quantity: this._clampQty(snapshot.quantity || 1),
                     title: snapshot.title || '',
                     variantTitle: snapshot.variantTitle || '',
-                    price: snapshot.price || { amount: '0.00', currencyCode: 'GBP' },
+                    price: safePrice,
                     image: snapshot.image || null,
                     handle: snapshot.handle || '',
                 });
