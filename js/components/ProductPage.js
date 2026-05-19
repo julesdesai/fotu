@@ -77,7 +77,7 @@ class ProductPage {
         container.innerHTML = `
             <span class="product-option-label">Quantity</span>
             <div class="product-qty-stepper">
-                <button type="button" data-qty-dec aria-label="Decrease">&#x2212;</button>
+                <button type="button" data-qty-dec aria-label="Decrease">−</button>
                 <span class="product-qty-value" data-qty-value>${this.qty}</span>
                 <button type="button" data-qty-inc aria-label="Increase">+</button>
             </div>
