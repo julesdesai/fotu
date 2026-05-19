@@ -39,8 +39,8 @@ export default async function handler(req, res) {
                     'X-Shopify-Access-Token': access_token,
                 },
                 body: JSON.stringify({
-                    query: `{
-                        productByHandle(handle: "${handle}") {
+                    query: `query ProductByHandle($handle: String!) {
+                        productByHandle(handle: $handle) {
                             id
                             title
                             description
@@ -77,6 +77,7 @@ export default async function handler(req, res) {
                             }
                         }
                     }`,
+                    variables: { handle },
                 }),
             }
         );

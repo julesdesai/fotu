@@ -83,3 +83,19 @@
         padding: var(--spacing-md);
     }
 }
+
+.product-error {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: var(--spacing-xl);
+}
+
+.product-error a {
+    color: var(--text-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

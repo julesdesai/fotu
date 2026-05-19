@@ -115,8 +115,8 @@ async function handleProduct(req, res) {
             'X-Shopify-Access-Token': access_token,
         },
         body: JSON.stringify({
-            query: `{
-                productByHandle(handle: "${handle}") {
+            query: `query ProductByHandle($handle: String!) {
+                productByHandle(handle: $handle) {
                     id
                     title
                     description
@@ -153,6 +153,7 @@ async function handleProduct(req, res) {
                     }
                 }
             }`,
+            variables: { handle },
         }),
     });
     const { data } = await productRes.json();

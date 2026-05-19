@@ -23,11 +23,11 @@ class ProductPage {
     }
 
     formatPrice(amount, currencyCode) {
-        const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+        const num = amount == null ? 0 : (typeof amount === 'string' ? parseFloat(amount) : amount);
         return new Intl.NumberFormat('en-GB', {
             style: 'currency',
             currency: currencyCode || 'GBP',
-        }).format(num);
+        }).format(isNaN(num) ? 0 : num);
     }
 
     findVariant(options) {
@@ -39,8 +39,7 @@ class ProductPage {
 
     setSelectedOption(name, value) {
         this.selectedOptions[name] = value;
-        const match = this.findVariant(this.selectedOptions);
-        if (match) this.selectedVariant = match;
+        this.selectedVariant = this.findVariant(this.selectedOptions) || null;
         this.renderOptions();
         this.renderPriceAndButton();
     }
@@ -102,6 +101,7 @@ class ProductPage {
         if (!v) {
             btn.disabled = true;
             btn.textContent = 'Unavailable';
+            btn.setAttribute('aria-label', 'Unavailable');
             return;
         }
         const currency = this.product.priceRange?.minVariantPrice?.currencyCode || 'GBP';
@@ -109,9 +109,11 @@ class ProductPage {
         if (!v.availableForSale) {
             btn.disabled = true;
             btn.textContent = 'Sold out';
+            btn.setAttribute('aria-label', `${this.product.title} is sold out`);
         } else {
             btn.disabled = false;
             btn.textContent = 'Add to cart';
+            btn.setAttribute('aria-label', `Add ${this.product.title} to cart`);
         }
     }
 
@@ -119,6 +121,10 @@ class ProductPage {
         const btn = document.getElementById('productAddToCart');
         btn.addEventListener('click', () => {
             if (!this.selectedVariant || !this.selectedVariant.availableForSale) return;
+            if (!window.Cart) {
+                console.error('Cart not available');
+                return;
+            }
             const v = this.selectedVariant;
             const currency = this.product.priceRange?.minVariantPrice?.currencyCode || 'GBP';
             const image = this.product.images?.edges?.[0]?.node || null;
@@ -172,6 +178,10 @@ class ProductPage {
             this.render(product);
         } catch (err) {
             console.error('Product fetch failed:', err);
+            const layout = document.querySelector('.product-layout');
+            if (layout) {
+                layout.innerHTML = '<p class="product-error">Product could not be loaded. <a href="shop.html">Back to shop</a></p>';
+            }
         }
     }
 }
