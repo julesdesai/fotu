@@ -14,19 +14,7 @@
                 <div class="hero-typewriter-left"></div>
                 <div class="hero-typewriter-right"></div>
                 <div class="hero-image">
-                    <video
-                        class="morph-gallery-video"
-                        autoplay
-                        muted
-                        loop
-                        playsinline
-                        preload="auto"
-                    >
-                        <source
-                            src="assets/gallery/hero-gallery.mp4"
-                            type="video/mp4"
-                        />
-                    </video>
+                    <canvas id="morphCanvas" class="morph-gallery-canvas"></canvas>
                 </div>
                 <div class="hero-overlay">
                     <!-- FOTU text now rendered as negative space in particle gallery -->
@@ -45,6 +33,7 @@
         <script src="js/components/BasketDrawer.js"></script>
 
         <script src="js/components/HeroTypewriters.js"></script>
+        <script src="js/components/ImageMorphGallery.js"></script>
         <script src="js/main.js"></script>
     </body>
 </html>
