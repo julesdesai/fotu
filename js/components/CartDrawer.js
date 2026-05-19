@@ -29,9 +29,9 @@
         _mount() {
             const html = `
                 <div class="cart-overlay" data-cart-overlay></div>
-                <aside class="cart-drawer" aria-hidden="true" data-cart-drawer>
+                <aside class="cart-drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="cart-drawer-title" data-cart-drawer>
                     <header class="cart-drawer-header">
-                        <span class="cart-drawer-title">Cart</span>
+                        <span class="cart-drawer-title" id="cart-drawer-title">Cart</span>
                         <button type="button" class="cart-drawer-close" data-cart-close aria-label="Close cart">✕</button>
                     </header>
                     <div class="cart-drawer-body" data-cart-body></div>
@@ -60,23 +60,30 @@
                 const lineEl = target.closest('[data-variant-id]');
                 if (!lineEl) return;
                 const variantId = lineEl.dataset.variantId;
-                if (target.matches('[data-line-inc]')) {
-                    const qty = parseInt(target.dataset.qty, 10);
-                    window.Cart.updateLine(variantId, qty + 1);
-                } else if (target.matches('[data-line-dec]')) {
-                    const qty = parseInt(target.dataset.qty, 10);
-                    window.Cart.updateLine(variantId, qty - 1);
-                } else if (target.matches('[data-line-remove]')) {
+                const inc = target.closest('[data-line-inc]');
+                if (inc) {
+                    window.Cart.updateLine(variantId, parseInt(inc.dataset.qty, 10) + 1);
+                    return;
+                }
+                const dec = target.closest('[data-line-dec]');
+                if (dec) {
+                    window.Cart.updateLine(variantId, parseInt(dec.dataset.qty, 10) - 1);
+                    return;
+                }
+                if (target.closest('[data-line-remove]')) {
                     window.Cart.removeLine(variantId);
                 }
             });
         }
 
         open() {
+            this._returnFocusTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             this.drawer.classList.add('is-open');
             this.overlay.classList.add('is-open');
             this.drawer.setAttribute('aria-hidden', 'false');
             document.body.classList.add('cart-open');
+            // Focus the close button so keyboard users land inside the drawer
+            this.drawer.querySelector('[data-cart-close]')?.focus();
         }
 
         close() {
@@ -84,9 +91,15 @@
             this.overlay.classList.remove('is-open');
             this.drawer.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('cart-open');
+            // Return focus to whatever triggered the open (e.g. CART link in navbar)
+            if (this._returnFocusTo && document.contains(this._returnFocusTo)) {
+                this._returnFocusTo.focus();
+            }
+            this._returnFocusTo = null;
         }
 
         render(state) {
+            if (!state) return;
             if (!state.lines || state.lines.length === 0) {
                 this.body.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
                 this.footer.innerHTML = '';
@@ -108,13 +121,13 @@
                             ${variantTitle ? `<span class="cart-line-variant">${escapeHtml(variantTitle)}</span>` : ''}
                             <div class="cart-line-row">
                                 <span class="cart-qty">
-                                    <button type="button" data-line-dec data-qty="${line.quantity}" aria-label="Decrease">−</button>
-                                    <span class="cart-qty-value">${line.quantity}</span>
-                                    <button type="button" data-line-inc data-qty="${line.quantity}" aria-label="Increase">+</button>
+                                    <button type="button" data-line-dec data-qty="${escapeHtml(line.quantity)}" aria-label="Decrease quantity of ${escapeHtml(line.title)}">−</button>
+                                    <span class="cart-qty-value">${escapeHtml(line.quantity)}</span>
+                                    <button type="button" data-line-inc data-qty="${escapeHtml(line.quantity)}" aria-label="Increase quantity of ${escapeHtml(line.title)}">+</button>
                                 </span>
                                 <span class="cart-line-price">${escapeHtml(formatPrice(lineTotal, currency))}</span>
                             </div>
-                            <button type="button" class="cart-line-remove" data-line-remove>Remove</button>
+                            <button type="button" class="cart-line-remove" data-line-remove aria-label="Remove ${escapeHtml(line.title)} from cart">Remove</button>
                         </div>
                     </div>
                 `;
