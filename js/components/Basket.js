@@ -1,17 +1,17 @@
-// Cart singleton: localStorage-backed cart state + event bus + permalink builder.
-// Other components MUST go through `window.Cart`.
+// Basket singleton: localStorage-backed basket state + event bus + permalink builder.
+// Other components MUST go through `window.Basket`.
 (function () {
-    const STORAGE_KEY = 'fotu_cart';
-    const EVENT_NAME = 'cart:updated';
+    const STORAGE_KEY = 'fotu_basket';
+    const EVENT_NAME = 'basket:updated';
     const SHOP_DOMAIN = 'kkixr1-uq.myshopify.com';
     const MAX_QTY = 10;
     const MIN_QTY = 1;
 
-    class Cart {
+    class Basket {
         constructor() {
             this.lines = this._load();
-            // Defer the emit so it fires after window.Cart is fully assigned.
-            // Subscribers loaded after this script must read window.Cart.state
+            // Defer the emit so it fires after window.Basket is fully assigned.
+            // Subscribers loaded after this script must read window.Basket.state
             // directly on init; the initial emit fires before they're listening.
             queueMicrotask(() => this._emit());
         }
@@ -23,7 +23,7 @@
                 const parsed = JSON.parse(raw);
                 return Array.isArray(parsed) ? parsed : [];
             } catch (e) {
-                console.warn('Cart load failed, starting empty:', e);
+                console.warn('Basket load failed, starting empty:', e);
                 return [];
             }
         }
@@ -32,7 +32,7 @@
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(this.lines));
             } catch (e) {
-                console.warn('Cart save failed:', e);
+                console.warn('Basket save failed:', e);
             }
         }
 
@@ -124,9 +124,9 @@
         }
 
         openDrawer() {
-            window.dispatchEvent(new CustomEvent('cart:open'));
+            window.dispatchEvent(new CustomEvent('basket:open'));
         }
     }
 
-    window.Cart = new Cart();
+    window.Basket = new Basket();
 })();

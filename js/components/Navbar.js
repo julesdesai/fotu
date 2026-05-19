@@ -71,7 +71,7 @@ class Navbar {
                         <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                         <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                         <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
-                        <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
+                        <a href="#" class="typewriter-link" data-basket-link aria-haspopup="dialog">BASKET</a>
                     </nav>
                     <div class="typewriter-divider"></div>
                 </div>
@@ -91,7 +91,7 @@ class Navbar {
                             <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                             <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                             <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
-                            <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
+                            <a href="#" class="typewriter-link" data-basket-link aria-haspopup="dialog">BASKET</a>
                         </nav>
                     </div>
                 </aside>
@@ -113,7 +113,7 @@ class Navbar {
                     <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                     <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                     <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
-                    <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
+                    <a href="#" class="typewriter-link" data-basket-link aria-haspopup="dialog">BASKET</a>
                 </nav>
             </div>
         `;
@@ -159,10 +159,10 @@ class Navbar {
         `;
   }
 
-  bindCartLinks() {
-    const links = document.querySelectorAll("[data-cart-link]");
+  bindBasketLinks() {
+    const links = document.querySelectorAll("[data-basket-link]");
     const refresh = (qty) => {
-      const label = qty > 0 ? `CART (${qty})` : "CART";
+      const label = qty > 0 ? `BASKET (${qty})` : "BASKET";
       links.forEach((a) => {
         a.textContent = label;
       });
@@ -170,13 +170,13 @@ class Navbar {
     links.forEach((a) => {
       a.addEventListener("click", (e) => {
         e.preventDefault();
-        window.dispatchEvent(new CustomEvent("cart:open"));
+        window.dispatchEvent(new CustomEvent("basket:open"));
       });
     });
-    window.addEventListener("cart:updated", (e) =>
+    window.addEventListener("basket:updated", (e) =>
       refresh(e.detail.totalQuantity || 0),
     );
-    if (window.Cart) refresh(window.Cart?.state?.totalQuantity ?? 0);
+    if (window.Basket) refresh(window.Basket?.state?.totalQuantity ?? 0);
   }
 
   init() {
@@ -187,7 +187,7 @@ class Navbar {
       document.body.insertAdjacentHTML("beforeend", this.getFooterHTML());
     }
     this.injectNavIntoTypewriter();
-    this.bindCartLinks();
+    this.bindBasketLinks();
   }
 }
 

@@ -21,7 +21,7 @@ The original v1 of this spec is in git history at the commit immediately before 
 
 ## Decisions
 
-1. **Cart shape:** multi-item cart on the site (drawer UI), not single-item "Buy Now".
+1. **Basket shape:** multi-item basket on the site (drawer UI), not single-item "Buy Now".
 2. **Checkout mechanism:** Shopify cart permalink redirect. Build a URL like `https://kkixr1-uq.myshopify.com/cart/42178129:2,42178131:1` from the variant IDs and quantities in the local cart, then `window.location.href = url`. Shopify hosted checkout takes over.
 3. **Cart state:** lives entirely client-side in `localStorage`. We store a denormalised snapshot of each line (variant id, qty, plus cached product/variant info for rendering) so the drawer renders without any network call.
 4. **No API changes for cart.** The existing `/api/products` and `/api/product` endpoints keep their current Admin-API-backed implementation. We add **one field** (`product.options { name values }`) to the `/api/product` GraphQL query so the variant picker can render cleanly. That's the only server-side change.
@@ -54,10 +54,10 @@ Unchanged except for one additive query field:
 | `/api/products` | GET | List products for shop grid | none |
 | `/api/product?handle=` | GET | Single product for detail page | add `options { name values }` to GraphQL query so the variant picker can render grouped option values without inferring from `selectedOptions` |
 
-### Client state — `Cart.js`
+### Client state — `Basket.js`
 
 - Singleton, initialised once per page (loaded via a shared script tag on every page that includes the navbar)
-- Persisted state: full cart array in `localStorage` under key `fotu_cart`
+- Persisted state: full cart array in `localStorage` under key `fotu_basket`
 - Schema (per line):
   ```json
   {
@@ -71,7 +71,7 @@ Unchanged except for one additive query field:
   }
   ```
   `variantTitle` is omitted when Shopify returns `"Default Title"` (single-variant products).
-- Events: emits `cart:updated` whenever state changes; `CartDrawer` and `Navbar` subscribe to re-render
+- Events: emits `cart:updated` whenever state changes; `BasketDrawer` and `Navbar` subscribe to re-render
 - All operations are synchronous (no `await`, no fetch). The drawer can react instantly.
 - Public methods:
   - `addLine(snapshot)` — accepts the full snapshot object (the product page builds it after the user selects a variant + qty). Merges with an existing line if `variantId` matches (sums quantities).
@@ -79,14 +79,14 @@ Unchanged except for one additive query field:
   - `removeLine(variantId)` — removes the line entirely.
   - `clear()` — empties the cart.
   - `getCheckoutUrl()` — returns `https://<SHOP_DOMAIN>/cart/<num>:<qty>,<num>:<qty>` built from the current lines.
-  - `openDrawer()` — dispatches `cart:open`.
+  - `openDrawer()` — dispatches `basket:open`.
 - Edge cases:
   - Quantity capped at 1–10 per line (drawer + product page both enforce; defence-in-depth).
   - `SHOP_DOMAIN` is hard-coded in the file (it's not secret; same value sits in `.env.example`).
 
 ### Checkout handoff
 
-- "Checkout" button → `window.location.href = Cart.getCheckoutUrl()`.
+- "Checkout" button → `window.location.href = Basket.getCheckoutUrl()`.
 - Shopify's hosted checkout reads the permalink, creates a cart server-side, redirects the buyer through address / shipping / payment.
 - On the Shopify "thank you" page, the customer can navigate back to our site. We do not clear the cart on our side automatically — there's no reliable signal that the order completed (no return URL with confirmation). Users who want to clear the cart can use the drawer's REMOVE links. (Acceptable for now; a follow-up could add a "Continue shopping" button that clears.)
 
@@ -94,20 +94,20 @@ Unchanged except for one additive query field:
 
 ### Navbar (`js/components/Navbar.js`)
 
-- Adds `CART (n)` link as the last item in desktop typewriter menu and mobile overlay, styled with `.typewriter-link`
-- Count comes from `Cart` state's total quantity; when 0, link reads `CART` (no parenthetical)
+- Adds `BASKET (n)` link as the last item in desktop typewriter menu and mobile overlay, styled with `.typewriter-link`
+- Count comes from `Basket` state's total quantity; when 0, link reads `BASKET` (no parenthetical)
 - Click opens the drawer rather than navigating
-- Subscribes to `cart:updated` to refresh count
+- Subscribes to `basket:updated` to refresh count
 
-### Cart drawer (`js/components/CartDrawer.js` + `css/cart.css`)
+### Basket drawer (`js/components/BasketDrawer.js` + `css/basket.css`)
 
 - Injected into `<body>` on every page (alongside `Navbar`)
 - Hidden off-canvas right; opens via slide-in transform + backdrop fade
 - Structure:
-  - **Header:** `CART` title + `✕` close button (typewriter aesthetic)
+  - **Header:** `BASKET` title + `✕` close button (typewriter aesthetic)
   - **Line list (scrollable):** thumbnail (60px), product title (links to product page), variant title (greyed; omitted when single-variant), `− qty +` stepper, line price, `REMOVE` text link
   - **Footer (sticky):** `SUBTOTAL £120.00` row computed client-side from cached line prices, full-width `CHECKOUT` button (typewriter-styled), small note: "Shipping & taxes calculated at checkout. Prices and stock confirmed at checkout."
-- Empty state: centred "YOUR CART IS EMPTY"
+- Empty state: centred "YOUR BASKET IS EMPTY"
 - Close behaviours: `✕` button, backdrop click, `Esc` key
 - Body scroll-locked while drawer open
 
@@ -122,36 +122,36 @@ After the description block, render:
 - **Quantity stepper** — `−  1  +`, capped at 1–10
 - **`ADD TO CART` button** — full-width, typewriter-styled
   - Disabled with label `SOLD OUT` when the resolved variant's `availableForSale === false`
-  - On click: builds a cart-line snapshot from the selected variant + product + qty, calls `Cart.addLine(snapshot)`, opens the drawer
+  - On click: builds a cart-line snapshot from the selected variant + product + qty, calls `Basket.addLine(snapshot)`, opens the drawer
   - No async failure path (no network call), so no inline error needed beyond ordinary form validation
 
 ## User flow
 
 1. User on shop grid → clicks product
 2. Product page renders; user picks variant + quantity; clicks ADD TO CART
-3. `Cart.addLine()` mutates localStorage + fires `cart:updated`
+3. `Basket.addLine()` mutates localStorage + fires `cart:updated`
 4. Drawer auto-opens with the new line; navbar count ticks up
 5. User can edit quantities / remove lines or close the drawer and keep shopping
-6. CHECKOUT button → `window.location.href = Cart.getCheckoutUrl()` → Shopify hosted checkout
+6. CHECKOUT button → `window.location.href = Basket.getCheckoutUrl()` → Shopify hosted checkout
 7. Shopify validates the cart, customer pays, gets confirmation. We're done.
 
 ## Files
 
 ### Create
 
-- `js/components/Cart.js` — singleton localStorage cart + event bus + permalink builder
-- `js/components/CartDrawer.js` — drawer UI, listens to `cart:updated`
-- `css/cart.css` — drawer styles, variant picker styles, qty stepper styles
+- `js/components/Basket.js` — singleton localStorage cart + event bus + permalink builder
+- `js/components/BasketDrawer.js` — drawer UI, listens to `cart:updated`
+- `css/basket.css` — drawer styles, variant picker styles, qty stepper styles
 
 ### Modify
 
 - `api/product.js` — add `options { name values }` to the GraphQL query (single line change)
 - `server.js` — same one-line addition in the mirror GraphQL query
-- `js/components/Navbar.js` — add `CART (n)` to desktop + mobile menus, wire to drawer open + `cart:updated`
+- `js/components/Navbar.js` — add `BASKET (n)` to desktop + mobile menus, wire to drawer open + `cart:updated`
 - `js/components/ProductPage.js` — variant picker rendering, qty stepper, Add-to-cart wiring
-- `pages/product.html` — add `<link>` for `cart.css`, containers for variant pickers / qty / button, Cart/CartDrawer script loads
-- `pages/shop.html` — `cart.css` + Cart/CartDrawer script loads
-- `index.html`, `pages/about.html`, `pages/digital-fabric.html`, `pages/game.html` — same `cart.css` + Cart/CartDrawer script loads so the cart link works site-wide
+- `pages/product.html` — add `<link>` for `basket.css`, containers for variant pickers / qty / button, Cart/CartDrawer script loads
+- `pages/shop.html` — `basket.css` + Cart/CartDrawer script loads
+- `index.html`, `pages/about.html`, `pages/digital-fabric.html`, `pages/game.html` — same `basket.css` + Cart/CartDrawer script loads so the cart link works site-wide
 
 ### Not touched (intentionally)
 

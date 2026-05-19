@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a multi-item localStorage-backed cart drawer to the FOTU shop, with checkout handed off via Shopify cart permalinks (`https://<shop>/cart/<varId>:<qty>,...`).
+**Goal:** Add a multi-item localStorage-backed basket drawer to the FOTU shop, with checkout handed off via Shopify cart permalinks (`https://<shop>/cart/<varId>:<qty>,...`).
 
 **Architecture:** Cart state lives entirely in the browser's `localStorage`. Drawer renders synchronously from cached line snapshots. "Checkout" builds a permalink URL and redirects to Shopify hosted checkout. No new server endpoints, no new Shopify tokens. The existing Admin-API-backed product fetches are untouched except for a single additive GraphQL field (`product.options { name values }`) used by the variant picker.
 
@@ -12,7 +12,7 @@
 
 **Testing approach:** No test framework exists in this repo. Verification is **manual** at the end of every task: `curl` for API, `npm run dev` + browser for UI. Each task ends with an explicit verification step and a commit. Do not skip verification.
 
-**XSS hygiene:** All UI components that build HTML via template strings MUST escape any string derived from Shopify (product title, variant title, option name/value, image alt) before interpolation. An `escapeHtml` helper is included in `CartDrawer.js` and `ProductPage.js`. The existing `productDescription` block still renders `descriptionHtml` from Shopify as HTML (Shopify-authored content — same trust model as before).
+**XSS hygiene:** All UI components that build HTML via template strings MUST escape any string derived from Shopify (product title, variant title, option name/value, image alt) before interpolation. An `escapeHtml` helper is included in `BasketDrawer.js` and `ProductPage.js`. The existing `productDescription` block still renders `descriptionHtml` from Shopify as HTML (Shopify-authored content — same trust model as before).
 
 **Permalink format note:** Shopify cart permalinks use the **numeric** variant ID, not the full GraphQL `gid://shopify/ProductVariant/<num>` form. Extract the numeric part with `variantId.split('/').pop()`. The shop domain is hardcoded as `kkixr1-uq.myshopify.com` (same value already in `.env`).
 
@@ -21,43 +21,43 @@
 ## File Structure
 
 **Create:**
-- `js/components/Cart.js` — singleton localStorage cart + event bus + permalink builder
-- `js/components/CartDrawer.js` — drawer UI
-- `css/cart.css` — drawer + picker + qty-stepper styles
+- `js/components/Basket.js` — singleton localStorage cart + event bus + permalink builder
+- `js/components/BasketDrawer.js` — drawer UI
+- `css/basket.css` — drawer + picker + qty-stepper styles
 
 **Modify:**
 - `api/product.js` — add `options { name values }` to GraphQL query
 - `server.js` — same one-line addition to mirror query
-- `js/components/Navbar.js` — `CART (n)` menu item, drawer open + count refresh
-- `js/components/ProductPage.js` — variant picker, qty stepper, Add to cart
+- `js/components/Navbar.js` — `BASKET (n)` menu item, drawer open + count refresh
+- `js/components/ProductPage.js` — variant picker, qty stepper, Add to basket
 - `pages/product.html` — picker / qty / button containers + Cart script/CSS loads
 - `pages/shop.html` — Cart script/CSS loads
 - `index.html`, `pages/about.html`, `pages/digital-fabric.html`, `pages/game.html` — Cart script/CSS loads for site-wide drawer
 
 ---
 
-## Task 1: Build `Cart.js` singleton (localStorage)
+## Task 1: Build `Basket.js` singleton (localStorage)
 
-**Goal:** A single in-page `Cart` instance that owns cart state in `localStorage`, exposes synchronous mutation methods, broadcasts `cart:updated`, and can produce a Shopify cart permalink URL.
+**Goal:** A single in-page `Basket` instance that owns cart state in `localStorage`, exposes synchronous mutation methods, broadcasts `basket:updated`, and can produce a Shopify cart permalink URL.
 
 **Files:**
-- Create: `js/components/Cart.js`
+- Create: `js/components/Basket.js`
 
-- [ ] **Step 1: Create `js/components/Cart.js`**
+- [ ] **Step 1: Create `js/components/Basket.js`**
 
-Create `js/components/Cart.js` with:
+Create `js/components/Basket.js` with:
 
 ```javascript
-// Cart singleton: localStorage-backed cart state + event bus + permalink builder.
-// Other components MUST go through `window.Cart`.
+// Basket singleton: localStorage-backed cart state + event bus + permalink builder.
+// Other components MUST go through `window.Basket`.
 (function () {
-    const STORAGE_KEY = 'fotu_cart';
-    const EVENT_NAME = 'cart:updated';
+    const STORAGE_KEY = 'fotu_basket';
+    const EVENT_NAME = 'basket:updated';
     const SHOP_DOMAIN = 'kkixr1-uq.myshopify.com';
     const MAX_QTY = 10;
     const MIN_QTY = 1;
 
-    class Cart {
+    class Basket {
         constructor() {
             this.lines = this._load();
             // Defer the first emit until the next tick so subscribers attached
@@ -163,11 +163,11 @@ Create `js/components/Cart.js` with:
         }
 
         openDrawer() {
-            window.dispatchEvent(new CustomEvent('cart:open'));
+            window.dispatchEvent(new CustomEvent('basket:open'));
         }
     }
 
-    window.Cart = new Cart();
+    window.Basket = new Basket();
 })();
 ```
 
@@ -176,7 +176,7 @@ Create `js/components/Cart.js` with:
 Add a temporary script tag to `pages/shop.html` BEFORE `ShopifyStore.js`:
 
 ```html
-<script src="../js/components/Cart.js"></script>
+<script src="../js/components/Basket.js"></script>
 ```
 
 (Task 2 finalises the shop.html loads; this is just so we can poke at it now.)
@@ -184,12 +184,12 @@ Add a temporary script tag to `pages/shop.html` BEFORE `ShopifyStore.js`:
 Run `npm run dev`, load `http://localhost:3000/pages/shop.html`, open devtools console:
 
 ```javascript
-window.Cart.state
+window.Basket.state
 // → { lines: [], totalQuantity: 0, subtotal: { amount: "0.00", currencyCode: "GBP" } }
 
-window.addEventListener('cart:updated', e => console.log('updated', e.detail));
+window.addEventListener('basket:updated', e => console.log('updated', e.detail));
 
-window.Cart.addLine({
+window.Basket.addLine({
     variantId: 'gid://shopify/ProductVariant/42178129',
     quantity: 2,
     title: 'Test Item',
@@ -197,30 +197,30 @@ window.Cart.addLine({
     price: { amount: '60.00', currencyCode: 'GBP' },
     handle: 'test-item',
 });
-window.Cart.state
+window.Basket.state
 // → totalQuantity: 2, subtotal.amount: "120.00", one line
 
-window.Cart.addLine({
+window.Basket.addLine({
     variantId: 'gid://shopify/ProductVariant/42178129',
     quantity: 1,
     title: 'Test Item',
     price: { amount: '60.00', currencyCode: 'GBP' },
 });
-window.Cart.state.totalQuantity  // → 3 (merged)
+window.Basket.state.totalQuantity  // → 3 (merged)
 
-window.Cart.updateLine('gid://shopify/ProductVariant/42178129', 5);
-window.Cart.state.totalQuantity  // → 5
+window.Basket.updateLine('gid://shopify/ProductVariant/42178129', 5);
+window.Basket.state.totalQuantity  // → 5
 
-window.Cart.getCheckoutUrl();
+window.Basket.getCheckoutUrl();
 // → "https://kkixr1-uq.myshopify.com/cart/42178129:5"
 
-localStorage.getItem('fotu_cart');  // → JSON with the line
+localStorage.getItem('fotu_basket');  // → JSON with the line
 location.reload();
-window.Cart.state.totalQuantity   // → 5 (persisted)
+window.Basket.state.totalQuantity   // → 5 (persisted)
 
-window.Cart.removeLine('gid://shopify/ProductVariant/42178129');
-window.Cart.state.totalQuantity   // → 0
-window.Cart.getCheckoutUrl();  // → null
+window.Basket.removeLine('gid://shopify/ProductVariant/42178129');
+window.Basket.state.totalQuantity   // → 0
+window.Basket.getCheckoutUrl();  // → null
 ```
 
 All assertions should hold.
@@ -228,28 +228,28 @@ All assertions should hold.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add js/components/Cart.js pages/shop.html
-git commit -m "Add localStorage-backed Cart singleton with permalink builder"
+git add js/components/Basket.js pages/shop.html
+git commit -m "Add localStorage-backed Basket singleton with permalink builder"
 ```
 
 ---
 
-## Task 2: Build cart drawer UI
+## Task 2: Build basket drawer UI
 
 **Goal:** A slide-in right drawer that lists cart lines with qty/remove controls, shows subtotal, and exposes a CHECKOUT button that redirects to the permalink URL. Driven entirely by `cart:updated` events. Opens on `cart:open` events.
 
 **Files:**
-- Create: `css/cart.css`
-- Create: `js/components/CartDrawer.js`
+- Create: `css/basket.css`
+- Create: `js/components/BasketDrawer.js`
 - Modify: `pages/shop.html` (finalise script/CSS loads)
 
-- [ ] **Step 1: Create `css/cart.css`**
+- [ ] **Step 1: Create `css/basket.css`**
 
-Create `css/cart.css` with:
+Create `css/basket.css` with:
 
 ```css
-/* Cart drawer overlay + panel */
-.cart-overlay {
+/* Basket drawer overlay + panel */
+.basket-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0);
@@ -258,12 +258,12 @@ Create `css/cart.css` with:
     transition: background 0.25s ease;
 }
 
-.cart-overlay.is-open {
+.basket-overlay.is-open {
     background: rgba(0, 0, 0, 0.25);
     pointer-events: auto;
 }
 
-.cart-drawer {
+.basket-drawer {
     position: fixed;
     top: 0;
     right: 0;
@@ -280,11 +280,11 @@ Create `css/cart.css` with:
     font-family: "Courier New", monospace;
 }
 
-.cart-drawer.is-open {
+.basket-drawer.is-open {
     transform: translateX(0);
 }
 
-.cart-drawer-header {
+.basket-drawer-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -292,14 +292,14 @@ Create `css/cart.css` with:
     border-bottom: 1px solid var(--border-color);
 }
 
-.cart-drawer-title {
+.basket-drawer-title {
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
-.cart-drawer-close {
+.basket-drawer-close {
     background: none;
     border: none;
     font-family: "Courier New", monospace;
@@ -309,13 +309,13 @@ Create `css/cart.css` with:
     padding: 4px 8px;
 }
 
-.cart-drawer-body {
+.basket-drawer-body {
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-md);
 }
 
-.cart-empty {
+.basket-empty {
     text-align: center;
     padding: var(--spacing-2xl) var(--spacing-md);
     font-size: 11px;
@@ -325,7 +325,7 @@ Create `css/cart.css` with:
     color: var(--text-muted);
 }
 
-.cart-line {
+.basket-line {
     display: grid;
     grid-template-columns: 60px 1fr;
     gap: var(--spacing-md);
@@ -333,7 +333,7 @@ Create `css/cart.css` with:
     border-bottom: 1px solid var(--border-color);
 }
 
-.cart-line-image {
+.basket-line-image {
     width: 60px;
     height: 80px;
     object-fit: cover;
@@ -341,13 +341,13 @@ Create `css/cart.css` with:
     display: block;
 }
 
-.cart-line-info {
+.basket-line-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.cart-line-title {
+.basket-line-title {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -356,26 +356,26 @@ Create `css/cart.css` with:
     text-decoration: none;
 }
 
-.cart-line-variant {
+.basket-line-variant {
     font-size: 10px;
     font-weight: 400;
     color: var(--text-muted);
 }
 
-.cart-line-row {
+.basket-line-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 4px;
 }
 
-.cart-qty {
+.basket-qty {
     display: inline-flex;
     align-items: center;
     border: 1px solid var(--border-color);
 }
 
-.cart-qty button {
+.basket-qty button {
     background: none;
     border: none;
     width: 26px;
@@ -385,25 +385,25 @@ Create `css/cart.css` with:
     cursor: pointer;
 }
 
-.cart-qty button:disabled {
+.basket-qty button:disabled {
     opacity: 0.3;
     cursor: not-allowed;
 }
 
-.cart-qty-value {
+.basket-qty-value {
     min-width: 24px;
     text-align: center;
     font-size: 11px;
     font-weight: 700;
 }
 
-.cart-line-price {
+.basket-line-price {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.03em;
 }
 
-.cart-line-remove {
+.basket-line-remove {
     background: none;
     border: none;
     font-family: "Courier New", monospace;
@@ -420,16 +420,16 @@ Create `css/cart.css` with:
     align-self: flex-start;
 }
 
-.cart-line-remove:hover {
+.basket-line-remove:hover {
     color: var(--text-dark);
 }
 
-.cart-drawer-footer {
+.basket-drawer-footer {
     border-top: 1px solid var(--border-color);
     padding: var(--spacing-md);
 }
 
-.cart-subtotal-row {
+.basket-subtotal-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -440,11 +440,11 @@ Create `css/cart.css` with:
     letter-spacing: 0.08em;
 }
 
-.cart-subtotal-amount {
+.basket-subtotal-amount {
     font-size: 13px;
 }
 
-.cart-checkout-button {
+.basket-checkout-button {
     display: block;
     width: 100%;
     padding: var(--spacing-md);
@@ -460,10 +460,10 @@ Create `css/cart.css` with:
     transition: opacity 0.2s ease;
 }
 
-.cart-checkout-button:hover { opacity: 0.85; }
-.cart-checkout-button:disabled { opacity: 0.4; cursor: not-allowed; }
+.basket-checkout-button:hover { opacity: 0.85; }
+.basket-checkout-button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.cart-footer-note {
+.basket-footer-note {
     text-align: center;
     font-size: 9px;
     color: var(--text-muted);
@@ -473,7 +473,7 @@ Create `css/cart.css` with:
     line-height: 1.4;
 }
 
-body.cart-open { overflow: hidden; }
+body.basket-open { overflow: hidden; }
 
 /* Variant picker + qty stepper on product page */
 .product-options {
@@ -552,7 +552,7 @@ body.cart-open { overflow: hidden; }
     font-weight: 700;
 }
 
-.product-add-to-cart {
+.product-add-to-basket {
     display: block;
     width: 100%;
     max-width: 320px;
@@ -570,25 +570,25 @@ body.cart-open { overflow: hidden; }
     margin-bottom: var(--spacing-md);
 }
 
-.product-add-to-cart:hover { opacity: 0.85; }
-.product-add-to-cart:disabled { opacity: 0.4; cursor: not-allowed; }
+.product-add-to-basket:hover { opacity: 0.85; }
+.product-add-to-basket:disabled { opacity: 0.4; cursor: not-allowed; }
 
 @media (max-width: 600px) {
-    .cart-drawer { width: 100%; border-left: none; }
+    .basket-drawer { width: 100%; border-left: none; }
 }
 ```
 
-- [ ] **Step 2: Create `js/components/CartDrawer.js`**
+- [ ] **Step 2: Create `js/components/BasketDrawer.js`**
 
 Note: this file uses `innerHTML` to render line items because it's the only practical way to do template-style rendering in vanilla JS without a framework. Every interpolated value passes through `escapeHtml` first.
 
-Create `js/components/CartDrawer.js` with:
+Create `js/components/BasketDrawer.js` with:
 
 ```javascript
-// Cart drawer UI. Subscribes to window 'cart:updated' and 'cart:open' events.
+// Basket drawer UI. Subscribes to window 'basket:updated' and 'basket:open' events.
 (function () {
-    if (!window.Cart) {
-        console.error('CartDrawer requires Cart.js to be loaded first');
+    if (!window.Basket) {
+        console.error('CartDrawer requires Basket.js to be loaded first');
         return;
     }
 
@@ -606,40 +606,40 @@ Create `js/components/CartDrawer.js` with:
         }[c]));
     }
 
-    class CartDrawer {
+    class BasketDrawer {
         constructor() {
             this._mount();
             this._bind();
-            this.render(window.Cart.state);
+            this.render(window.Basket.state);
         }
 
         _mount() {
             const html = `
-                <div class="cart-overlay" data-cart-overlay></div>
-                <aside class="cart-drawer" aria-hidden="true" data-cart-drawer>
-                    <header class="cart-drawer-header">
-                        <span class="cart-drawer-title">Cart</span>
-                        <button type="button" class="cart-drawer-close" data-cart-close aria-label="Close cart">✕</button>
+                <div class="basket-overlay" data-basket-overlay></div>
+                <aside class="basket-drawer" aria-hidden="true" data-basket-drawer>
+                    <header class="basket-drawer-header">
+                        <span class="basket-drawer-title">Cart</span>
+                        <button type="button" class="basket-drawer-close" data-basket-close aria-label="Close cart">✕</button>
                     </header>
-                    <div class="cart-drawer-body" data-cart-body></div>
-                    <footer class="cart-drawer-footer" data-cart-footer></footer>
+                    <div class="basket-drawer-body" data-basket-body></div>
+                    <footer class="basket-drawer-footer" data-basket-footer></footer>
                 </aside>
             `;
             document.body.insertAdjacentHTML('beforeend', html);
-            this.overlay = document.querySelector('[data-cart-overlay]');
-            this.drawer = document.querySelector('[data-cart-drawer]');
-            this.body = document.querySelector('[data-cart-body]');
-            this.footer = document.querySelector('[data-cart-footer]');
+            this.overlay = document.querySelector('[data-basket-overlay]');
+            this.drawer = document.querySelector('[data-basket-drawer]');
+            this.body = document.querySelector('[data-basket-body]');
+            this.footer = document.querySelector('[data-basket-footer]');
         }
 
         _bind() {
             this.overlay.addEventListener('click', () => this.close());
-            this.drawer.querySelector('[data-cart-close]').addEventListener('click', () => this.close());
+            this.drawer.querySelector('[data-basket-close]').addEventListener('click', () => this.close());
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && this.drawer.classList.contains('is-open')) this.close();
             });
-            window.addEventListener('cart:open', () => this.open());
-            window.addEventListener('cart:updated', (e) => this.render(e.detail));
+            window.addEventListener('basket:open', () => this.open());
+            window.addEventListener('basket:updated', (e) => this.render(e.detail));
 
             // Body delegate for line controls
             this.body.addEventListener('click', (e) => {
@@ -649,12 +649,12 @@ Create `js/components/CartDrawer.js` with:
                 const variantId = lineEl.dataset.variantId;
                 if (target.matches('[data-line-inc]')) {
                     const qty = parseInt(target.dataset.qty, 10);
-                    window.Cart.updateLine(variantId, qty + 1);
+                    window.Basket.updateLine(variantId, qty + 1);
                 } else if (target.matches('[data-line-dec]')) {
                     const qty = parseInt(target.dataset.qty, 10);
-                    window.Cart.updateLine(variantId, qty - 1);
+                    window.Basket.updateLine(variantId, qty - 1);
                 } else if (target.matches('[data-line-remove]')) {
-                    window.Cart.removeLine(variantId);
+                    window.Basket.removeLine(variantId);
                 }
             });
         }
@@ -663,19 +663,19 @@ Create `js/components/CartDrawer.js` with:
             this.drawer.classList.add('is-open');
             this.overlay.classList.add('is-open');
             this.drawer.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('cart-open');
+            document.body.classList.add('basket-open');
         }
 
         close() {
             this.drawer.classList.remove('is-open');
             this.overlay.classList.remove('is-open');
             this.drawer.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('cart-open');
+            document.body.classList.remove('basket-open');
         }
 
         render(state) {
             if (!state.lines || state.lines.length === 0) {
-                this.body.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+                this.body.innerHTML = '<div class="basket-empty">Your basket is empty</div>';
                 this.footer.innerHTML = '';
                 return;
             }
@@ -688,20 +688,20 @@ Create `js/components/CartDrawer.js` with:
                     ? `product.html?handle=${encodeURIComponent(line.handle)}`
                     : '#';
                 return `
-                    <div class="cart-line" data-variant-id="${escapeHtml(line.variantId)}">
-                        ${line.image ? `<img class="cart-line-image" src="${escapeHtml(line.image.url)}" alt="${escapeHtml(line.image.altText || line.title || '')}" />` : '<div class="cart-line-image"></div>'}
-                        <div class="cart-line-info">
-                            <a class="cart-line-title" href="${escapeHtml(productHref)}">${escapeHtml(line.title)}</a>
-                            ${variantTitle ? `<span class="cart-line-variant">${escapeHtml(variantTitle)}</span>` : ''}
-                            <div class="cart-line-row">
-                                <span class="cart-qty">
+                    <div class="basket-line" data-variant-id="${escapeHtml(line.variantId)}">
+                        ${line.image ? `<img class="basket-line-image" src="${escapeHtml(line.image.url)}" alt="${escapeHtml(line.image.altText || line.title || '')}" />` : '<div class="basket-line-image"></div>'}
+                        <div class="basket-line-info">
+                            <a class="basket-line-title" href="${escapeHtml(productHref)}">${escapeHtml(line.title)}</a>
+                            ${variantTitle ? `<span class="basket-line-variant">${escapeHtml(variantTitle)}</span>` : ''}
+                            <div class="basket-line-row">
+                                <span class="basket-qty">
                                     <button type="button" data-line-dec data-qty="${line.quantity}" aria-label="Decrease">−</button>
-                                    <span class="cart-qty-value">${line.quantity}</span>
+                                    <span class="basket-qty-value">${line.quantity}</span>
                                     <button type="button" data-line-inc data-qty="${line.quantity}" aria-label="Increase">+</button>
                                 </span>
-                                <span class="cart-line-price">${escapeHtml(formatPrice(lineTotal, currency))}</span>
+                                <span class="basket-line-price">${escapeHtml(formatPrice(lineTotal, currency))}</span>
                             </div>
-                            <button type="button" class="cart-line-remove" data-line-remove>Remove</button>
+                            <button type="button" class="basket-line-remove" data-line-remove>Remove</button>
                         </div>
                     </div>
                 `;
@@ -709,16 +709,16 @@ Create `js/components/CartDrawer.js` with:
 
             const subtotal = state.subtotal;
             this.footer.innerHTML = `
-                <div class="cart-subtotal-row">
+                <div class="basket-subtotal-row">
                     <span>Subtotal</span>
-                    <span class="cart-subtotal-amount">${escapeHtml(formatPrice(subtotal.amount, subtotal.currencyCode))}</span>
+                    <span class="basket-subtotal-amount">${escapeHtml(formatPrice(subtotal.amount, subtotal.currencyCode))}</span>
                 </div>
-                <button type="button" class="cart-checkout-button" data-cart-checkout>Checkout</button>
-                <p class="cart-footer-note">Shipping & taxes calculated at checkout. Prices and stock confirmed at checkout.</p>
+                <button type="button" class="basket-checkout-button" data-basket-checkout>Checkout</button>
+                <p class="basket-footer-note">Shipping & taxes calculated at checkout. Prices and stock confirmed at checkout.</p>
             `;
-            const checkoutBtn = this.footer.querySelector('[data-cart-checkout]');
+            const checkoutBtn = this.footer.querySelector('[data-basket-checkout]');
             checkoutBtn.addEventListener('click', () => {
-                const url = window.Cart.getCheckoutUrl();
+                const url = window.Basket.getCheckoutUrl();
                 if (url) window.location.href = url;
             });
         }
@@ -739,15 +739,15 @@ Edit `pages/shop.html` and replace the `<head>` and end-of-body script blocks so
     <title>FOTU - Shop</title>
     <link rel="stylesheet" href="../css/main.css" />
     <link rel="stylesheet" href="../css/shop.css" />
-    <link rel="stylesheet" href="../css/cart.css" />
+    <link rel="stylesheet" href="../css/basket.css" />
 </head>
 ```
 
 ```html
 <script src="../js/components/Navbar.js"></script>
 <script src="../js/main.js"></script>
-<script src="../js/components/Cart.js"></script>
-<script src="../js/components/CartDrawer.js"></script>
+<script src="../js/components/Basket.js"></script>
+<script src="../js/components/BasketDrawer.js"></script>
 <script src="../js/components/ShopifyStore.js"></script>
 ```
 
@@ -756,7 +756,7 @@ Edit `pages/shop.html` and replace the `<head>` and end-of-body script blocks so
 `npm run dev`, load `http://localhost:3000/pages/shop.html`, open devtools console:
 
 ```javascript
-window.Cart.addLine({
+window.Basket.addLine({
     variantId: 'gid://shopify/ProductVariant/42178129',
     quantity: 1,
     title: 'Test Item',
@@ -764,13 +764,13 @@ window.Cart.addLine({
     price: { amount: '60.00', currencyCode: 'GBP' },
     handle: 'test-item',
 });
-window.dispatchEvent(new CustomEvent('cart:open'));
+window.dispatchEvent(new CustomEvent('basket:open'));
 ```
 
 Expected:
 - Drawer slides in from the right with the line, qty controls, line price, subtotal £60.00, CHECKOUT button
 - `+` increments qty; `−` decrements (removes the line when going below 1); REMOVE removes the line immediately
-- Empty state shows "Your cart is empty" when no lines remain
+- Empty state shows "Your basket is empty" when no lines remain
 - `Esc`, `✕`, and backdrop click all close the drawer
 - Body scroll is locked while drawer is open
 - Clicking CHECKOUT navigates to `https://kkixr1-uq.myshopify.com/cart/42178129:1` — Shopify's hosted checkout should load with the item (it may show an error for a fake variant id; that's fine — what we want is to see Shopify loading the URL)
@@ -778,26 +778,26 @@ Expected:
 Then clean up:
 
 ```javascript
-window.Cart.clear();
+window.Basket.clear();
 ```
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add css/cart.css js/components/CartDrawer.js pages/shop.html
-git commit -m "Add cart drawer UI rendering from localStorage cart state"
+git add css/basket.css js/components/BasketDrawer.js pages/shop.html
+git commit -m "Add basket drawer UI rendering from localStorage cart state"
 ```
 
 ---
 
-## Task 3: Add `CART (n)` to navbar
+## Task 3: Add `BASKET (n)` to navbar
 
 **Goal:** A new link at the end of the typewriter menu (desktop sidebar + homepage column + mobile overlay) that opens the drawer and reflects the cart's current total quantity.
 
 **Files:**
 - Modify: `js/components/Navbar.js`
 
-- [ ] **Step 1: Add CART link to all three menu templates**
+- [ ] **Step 1: Add BASKET link to all three menu templates**
 
 Edit `js/components/Navbar.js`. The `injectNavIntoTypewriter` method renders three `<nav class="typewriter-menu">` blocks: homepage column, sidebar on other pages, and mobile overlay. Each ends with this line:
 
@@ -808,7 +808,7 @@ Edit `js/components/Navbar.js`. The `injectNavIntoTypewriter` method renders thr
 In **all three** templates, immediately after that line, insert:
 
 ```html
-<a href="#" class="typewriter-link" data-cart-link>CART</a>
+<a href="#" class="typewriter-link" data-basket-link>BASKET</a>
 ```
 
 - [ ] **Step 2: Add `bindCartLinks` method**
@@ -817,20 +817,20 @@ Inside the `Navbar` class, add this method directly above `init()`:
 
 ```javascript
 bindCartLinks() {
-    const links = document.querySelectorAll('[data-cart-link]');
+    const links = document.querySelectorAll('[data-basket-link]');
     const refresh = (qty) => {
-        const label = qty > 0 ? `CART (${qty})` : 'CART';
+        const label = qty > 0 ? `BASKET (${qty})` : 'BASKET';
         links.forEach((a) => { a.textContent = label; });
     };
     links.forEach((a) => {
         a.addEventListener('click', (e) => {
             e.preventDefault();
-            window.dispatchEvent(new CustomEvent('cart:open'));
+            window.dispatchEvent(new CustomEvent('basket:open'));
             document.querySelector('.mobile-nav-overlay')?.classList.remove('active');
         });
     });
-    window.addEventListener('cart:updated', (e) => refresh(e.detail.totalQuantity || 0));
-    if (window.Cart) refresh(window.Cart.state.totalQuantity || 0);
+    window.addEventListener('basket:updated', (e) => refresh(e.detail.totalQuantity || 0));
+    if (window.Basket) refresh(window.Basket.state.totalQuantity || 0);
 }
 ```
 
@@ -854,10 +854,10 @@ init() {
 - [ ] **Step 4: Verify in browser**
 
 Reload `http://localhost:3000/pages/shop.html`. Expected:
-- The CART link appears at the bottom of the typewriter menu (under SHOP) styled like every other link
+- The BASKET link appears at the bottom of the typewriter menu (under SHOP) styled like every other link
 - Clicking CART opens the drawer
-- After `window.Cart.addLine({...quantity: 2...})` in the console, the link reads `CART (2)`
-- Clearing the cart returns the link to `CART`
+- After `window.Basket.addLine({...quantity: 2...})` in the console, the link reads `CART (2)`
+- Clearing the cart returns the link to `BASKET`
 - On mobile (devtools responsive mode), opening the mobile menu and tapping CART closes the menu overlay AND opens the drawer
 
 - [ ] **Step 5: Commit**
@@ -869,9 +869,9 @@ git commit -m "Add CART menu link to navbar that opens drawer and tracks count"
 
 ---
 
-## Task 4: Product page — variant picker, qty stepper, Add to cart
+## Task 4: Product page — variant picker, qty stepper, Add to basket
 
-**Goal:** Render variant pickers (when needed), a quantity stepper, and an ADD TO CART button on the product detail page. Clicking adds a snapshot of the selected variant to `window.Cart` and opens the drawer.
+**Goal:** Render variant pickers (when needed), a quantity stepper, and an ADD TO CART button on the product detail page. Clicking adds a snapshot of the selected variant to `window.Basket` and opens the drawer.
 
 **Files:**
 - Modify: `api/product.js` (add `options { name values }`)
@@ -943,7 +943,7 @@ Replace the full contents of `pages/product.html` with:
         <title>FOTU - Product</title>
         <link rel="stylesheet" href="../css/main.css" />
         <link rel="stylesheet" href="../css/product.css" />
-        <link rel="stylesheet" href="../css/cart.css" />
+        <link rel="stylesheet" href="../css/basket.css" />
     </head>
     <body>
         <main class="product-main">
@@ -957,7 +957,7 @@ Replace the full contents of `pages/product.html` with:
                     <div class="product-description" id="productDescription"></div>
                     <div class="product-options" id="productOptions"></div>
                     <div class="product-qty" id="productQty"></div>
-                    <button class="product-add-to-cart" id="productAddToCart" type="button" disabled>Add to cart</button>
+                    <button class="product-add-to-basket" id="productAddToBasket" type="button" disabled>Add to basket</button>
                     <a class="product-back" href="shop.html">&larr; Back to shop</a>
                 </div>
             </div>
@@ -965,8 +965,8 @@ Replace the full contents of `pages/product.html` with:
 
         <script src="../js/components/Navbar.js"></script>
         <script src="../js/main.js"></script>
-        <script src="../js/components/Cart.js"></script>
-        <script src="../js/components/CartDrawer.js"></script>
+        <script src="../js/components/Basket.js"></script>
+        <script src="../js/components/BasketDrawer.js"></script>
         <script src="../js/components/ProductPage.js"></script>
     </body>
 </html>
@@ -1076,7 +1076,7 @@ class ProductPage {
 
     renderPriceAndButton() {
         const priceEl = document.getElementById('productPrice');
-        const btn = document.getElementById('productAddToCart');
+        const btn = document.getElementById('productAddToBasket');
         const v = this.selectedVariant;
         if (!v) {
             btn.disabled = true;
@@ -1090,18 +1090,18 @@ class ProductPage {
             btn.textContent = 'Sold out';
         } else {
             btn.disabled = false;
-            btn.textContent = 'Add to cart';
+            btn.textContent = 'Add to basket';
         }
     }
 
     bindAddToCart() {
-        const btn = document.getElementById('productAddToCart');
+        const btn = document.getElementById('productAddToBasket');
         btn.addEventListener('click', () => {
             if (!this.selectedVariant || !this.selectedVariant.availableForSale) return;
             const v = this.selectedVariant;
             const currency = this.product.priceRange?.minVariantPrice?.currencyCode || 'GBP';
             const image = this.product.images?.edges?.[0]?.node || null;
-            window.Cart.addLine({
+            window.Basket.addLine({
                 variantId: v.id,
                 quantity: this.qty,
                 title: this.product.title,
@@ -1110,7 +1110,7 @@ class ProductPage {
                 image: image ? { url: image.url, altText: image.altText } : null,
                 handle: this.product.handle,
             });
-            window.dispatchEvent(new CustomEvent('cart:open'));
+            window.dispatchEvent(new CustomEvent('basket:open'));
         });
     }
 
@@ -1174,7 +1174,7 @@ If your store has a multi-variant product, navigate to it. Expected:
 - Initial selection is the first available variant; matching buttons highlighted
 - Clicking a different value updates the price (if variants are priced differently)
 - If the resulting variant is unavailable, ADD TO CART reads "Sold out" and is disabled
-- Adding to cart stores the correct `variantId` (check `localStorage.getItem('fotu_cart')` in devtools)
+- Adding to cart stores the correct `variantId` (check `localStorage.getItem('fotu_basket')` in devtools)
 
 If your catalogue has no multi-variant product, skip this step; the conditional render in `renderOptions()` exercises the multi-variant path when applicable.
 
@@ -1182,14 +1182,14 @@ If your catalogue has no multi-variant product, skip this step; the conditional 
 
 ```bash
 git add api/product.js server.js pages/product.html js/components/ProductPage.js
-git commit -m "Add variant picker, qty stepper, and Add to cart on product page"
+git commit -m "Add variant picker, qty stepper, and Add to basket on product page"
 ```
 
 ---
 
 ## Task 5: Site-wide drawer integration
 
-**Goal:** Load `Cart.js` + `CartDrawer.js` + `cart.css` on every page that has the navbar so the CART link works everywhere.
+**Goal:** Load `Basket.js` + `BasketDrawer.js` + `basket.css` on every page that has the navbar so the BASKET link works everywhere.
 
 **Files:**
 - Modify: `index.html`
@@ -1199,30 +1199,30 @@ git commit -m "Add variant picker, qty stepper, and Add to cart on product page"
 
 - [ ] **Step 1: Update `index.html`**
 
-In `index.html`, add `cart.css` to `<head>` after the existing stylesheets:
+In `index.html`, add `basket.css` to `<head>` after the existing stylesheets:
 
 ```html
-<link rel="stylesheet" href="css/cart.css" />
+<link rel="stylesheet" href="css/basket.css" />
 ```
 
 In the script block at the bottom, after `<script src="js/components/Navbar.js"></script>`, add:
 
 ```html
-<script src="js/components/Cart.js"></script>
-<script src="js/components/CartDrawer.js"></script>
+<script src="js/components/Basket.js"></script>
+<script src="js/components/BasketDrawer.js"></script>
 ```
 
 - [ ] **Step 2: Update `pages/about.html`**
 
 ```html
-<link rel="stylesheet" href="../css/cart.css" />
+<link rel="stylesheet" href="../css/basket.css" />
 ```
 
 After the navbar script:
 
 ```html
-<script src="../js/components/Cart.js"></script>
-<script src="../js/components/CartDrawer.js"></script>
+<script src="../js/components/Basket.js"></script>
+<script src="../js/components/BasketDrawer.js"></script>
 ```
 
 - [ ] **Step 3: Update `pages/digital-fabric.html`**
@@ -1230,14 +1230,14 @@ After the navbar script:
 Same pattern:
 
 ```html
-<link rel="stylesheet" href="../css/cart.css" />
+<link rel="stylesheet" href="../css/basket.css" />
 ```
 
 After the navbar script:
 
 ```html
-<script src="../js/components/Cart.js"></script>
-<script src="../js/components/CartDrawer.js"></script>
+<script src="../js/components/Basket.js"></script>
+<script src="../js/components/BasketDrawer.js"></script>
 ```
 
 - [ ] **Step 4: Update `pages/game.html`**
@@ -1245,14 +1245,14 @@ After the navbar script:
 Same pattern:
 
 ```html
-<link rel="stylesheet" href="../css/cart.css" />
+<link rel="stylesheet" href="../css/basket.css" />
 ```
 
 After the navbar script:
 
 ```html
-<script src="../js/components/Cart.js"></script>
-<script src="../js/components/CartDrawer.js"></script>
+<script src="../js/components/Basket.js"></script>
+<script src="../js/components/BasketDrawer.js"></script>
 ```
 
 - [ ] **Step 5: Verify site-wide**
@@ -1264,7 +1264,7 @@ After the navbar script:
 - `http://localhost:3000/pages/game.html`
 
 On every page:
-- The CART link shows `CART (n)` matching the current cart count
+- The BASKET link shows `BASKET (n)` matching the current cart count
 - Clicking the link opens the drawer with the cart contents
 - The drawer's CHECKOUT button redirects to a `kkixr1-uq.myshopify.com/cart/...` URL
 
@@ -1272,7 +1272,7 @@ On every page:
 
 ```bash
 git add index.html pages/about.html pages/digital-fabric.html pages/game.html
-git commit -m "Load cart drawer site-wide so CART link works on every page"
+git commit -m "Load basket drawer site-wide so BASKET link works on every page"
 ```
 
 ---
@@ -1292,22 +1292,22 @@ Open an incognito window so `localStorage` is empty. Then:
 5. Click ADD TO CART — drawer opens with the line, navbar shows `CART (2)`
 6. Increment qty in the drawer to 3 — count updates, subtotal updates
 7. Add a second product (different variant id) — drawer shows two lines
-8. Navigate to `/pages/about.html` — `CART (n)` persists, drawer opens on click
+8. Navigate to `/pages/about.html` — `BASKET (n)` persists, drawer opens on click
 9. Open drawer, click CHECKOUT — browser navigates to `https://kkixr1-uq.myshopify.com/cart/<id>:<qty>,<id>:<qty>`
 10. Shopify hosted checkout loads with the correct items, quantities, and prices. (If a variant is sold out, Shopify will show an error here — that's the expected failure surface for the permalink approach.)
 11. Close the Shopify tab without completing
 12. Return to your site, reload — cart still shows the items (persisted in localStorage)
-13. Use REMOVE in the drawer to empty the cart — drawer shows empty state, navbar returns to `CART`
+13. Use REMOVE in the drawer to empty the cart — drawer shows empty state, navbar returns to `BASKET`
 
 - [ ] **Step 2: Verify `localStorage` persistence**
 
 In devtools console:
 
 ```javascript
-JSON.parse(localStorage.getItem('fotu_cart'))
+JSON.parse(localStorage.getItem('fotu_basket'))
 ```
 
-Should be an array of line objects matching the drawer. Reload — same data. `Cart.clear()` should empty both the in-memory state and the localStorage entry.
+Should be an array of line objects matching the drawer. Reload — same data. `Basket.clear()` should empty both the in-memory state and the localStorage entry.
 
 - [ ] **Step 3: Confirm no dead Storefront API references**
 
@@ -1330,6 +1330,6 @@ Skim the file list against the spec's "Files" section — every file expected to
 
 ## Done
 
-The shop now supports browsing, multi-item cart management via a slide-in drawer, and Shopify-hosted checkout via the permalink redirect. No new Shopify configuration was required.
+The shop now supports browsing, multi-item basket management via a slide-in drawer, and Shopify-hosted checkout via the permalink redirect. No new Shopify configuration was required.
 
 **Out of scope reminder (intentional):** discount-code entry in our drawer, custom cart attributes, customer accounts / saved carts across devices, multi-currency, inventory polling, auto-clear after checkout. Add as separate follow-up plans if needed.

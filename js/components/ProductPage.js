@@ -1,4 +1,4 @@
-// Product detail: fetches one product, renders details + variant picker + qty + add-to-cart.
+// Product detail: fetches one product, renders details + variant picker + qty + add-to-basket.
 class ProductPage {
     constructor() {
         this.handle = new URLSearchParams(window.location.search).get('handle');
@@ -96,7 +96,7 @@ class ProductPage {
 
     renderPriceAndButton() {
         const priceEl = document.getElementById('productPrice');
-        const btn = document.getElementById('productAddToCart');
+        const btn = document.getElementById('productAddToBasket');
         const v = this.selectedVariant;
         if (!v) {
             btn.disabled = true;
@@ -112,23 +112,23 @@ class ProductPage {
             btn.setAttribute('aria-label', `${this.product.title} is sold out`);
         } else {
             btn.disabled = false;
-            btn.textContent = 'Add to cart';
-            btn.setAttribute('aria-label', `Add ${this.product.title} to cart`);
+            btn.textContent = 'Add to basket';
+            btn.setAttribute('aria-label', `Add ${this.product.title} to basket`);
         }
     }
 
-    bindAddToCart() {
-        const btn = document.getElementById('productAddToCart');
+    bindAddToBasket() {
+        const btn = document.getElementById('productAddToBasket');
         btn.addEventListener('click', () => {
             if (!this.selectedVariant || !this.selectedVariant.availableForSale) return;
-            if (!window.Cart) {
-                console.error('Cart not available');
+            if (!window.Basket) {
+                console.error('Basket not available');
                 return;
             }
             const v = this.selectedVariant;
             const currency = this.product.priceRange?.minVariantPrice?.currencyCode || 'GBP';
             const image = this.product.images?.edges?.[0]?.node || null;
-            window.Cart.addLine({
+            window.Basket.addLine({
                 variantId: v.id,
                 quantity: this.qty,
                 title: this.product.title,
@@ -137,7 +137,7 @@ class ProductPage {
                 image: image ? { url: image.url, altText: image.altText } : null,
                 handle: this.product.handle,
             });
-            window.dispatchEvent(new CustomEvent('cart:open'));
+            window.dispatchEvent(new CustomEvent('basket:open'));
         });
     }
 
@@ -169,7 +169,7 @@ class ProductPage {
         this.renderOptions();
         this.renderQty();
         this.renderPriceAndButton();
-        this.bindAddToCart();
+        this.bindAddToBasket();
     }
 
     async init() {
