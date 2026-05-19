@@ -115,6 +115,7 @@ a.shop-item {
     aspect-ratio: 3 / 4;
     overflow: hidden;
     background: var(--bg-gray);
+    transition: opacity 0.25s ease;
 }
 
 .shop-item-image img {
@@ -122,6 +123,10 @@ a.shop-item {
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+.shop-item:hover .shop-item-image {
+    opacity: 0.7;
 }
 
 .shop-item-info {
