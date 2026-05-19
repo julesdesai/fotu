@@ -843,36 +843,47 @@ class SnakeGame {
     
     drawResetMessage() {
         if (this.gameState !== 'reset') return;
-        
+
+        // End-of-round timeline (at 60fps):
+        //   0–60   (0–1s)   : background fades from transparent to fully black
+        //   60–180 (1–3s)   : black screen, no text — deliberate pause
+        //   180    (3s)     : '> Friendship as eating together' appears
+        //   240    (4s)     : '> Connection established' appears
+        //   300    (5s)     : '> Restarting...' appears
+        //   300–600 (5–10s) : all three messages held on screen for 5s
+        //   600    (10s)    : handleResetState resets the game
         const elapsed = this.time - this.resetStartTime;
         const fadeIn = Math.min(1, elapsed / 60);
-        
-        // Terminal-style background
-        this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeIn * 0.8})`;
+
+        // Full-black background (was capped at 0.8 alpha before).
+        this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeIn})`;
         this.ctx.fillRect(0, 0, this.width, this.height);
-        
-        // Terminal text
+
+        // Terminal text — only starts after the 3s pause.
         this.ctx.font = '20px monospace';
         this.ctx.fillStyle = `rgba(0, 255, 0, ${fadeIn})`;
         this.ctx.textAlign = 'center';
-        
+
         const messages = [
             '> Friendship as eating together',
             '> Connection established',
             '> Restarting...'
         ];
-        
+
+        const messagesStart = 180; // 3s
+        const messageGap = 60;     // 1s between lines
+
         messages.forEach((msg, index) => {
-            if (elapsed > (index + 1) * 80) {
+            if (elapsed > messagesStart + index * messageGap) {
                 this.ctx.fillText(msg, this.width / 2, this.height / 2 - 40 + index * 30);
             }
         });
-        
-        // Blinking cursor
-        if (Math.floor(elapsed / 30) % 2 === 0) {
+
+        // Blinking cursor — only after the first message appears.
+        if (elapsed > messagesStart && Math.floor(elapsed / 30) % 2 === 0) {
             this.ctx.fillText('_', this.width / 2 + 50, this.height / 2 + 50);
         }
-        
+
         this.ctx.textAlign = 'left';
     }
     
@@ -1238,9 +1249,11 @@ class SnakeGame {
     }
     
     handleResetState() {
-        const resetDuration = 240; // 4 seconds at 60fps
+        // 10 seconds at 60fps. Matches the drawResetMessage timeline:
+        // 1s fade + 2s black pause + 2s for messages to land + 5s hold.
+        const resetDuration = 600;
         const elapsed = this.time - this.resetStartTime;
-        
+
         if (elapsed > resetDuration) {
             // Reset the game
             this.resetGame();
