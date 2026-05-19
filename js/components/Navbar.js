@@ -67,10 +67,10 @@ class Navbar {
                     <div class="typewriter-divider"></div>
                     <nav class="typewriter-menu">
                         <a href="${paths.home}" class="typewriter-link ${this.currentPage === "home" ? "active" : ""}">HOME</a>
-                        <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
-                        <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                         <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
                         <a href="#" class="typewriter-link" data-basket-link aria-haspopup="dialog">BASKET</a>
+                        <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
+                        <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                     </nav>
                     <div class="typewriter-divider"></div>
                 </div>
@@ -86,10 +86,10 @@ class Navbar {
                         <div class="typewriter-divider"></div>
                         <nav class="typewriter-menu">
                             <a href="${paths.home}" class="typewriter-link ${this.currentPage === "home" ? "active" : ""}">HOME</a>
-                                <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
-                            <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                             <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
                             <a href="#" class="typewriter-link" data-basket-link aria-haspopup="dialog">BASKET</a>
+                            <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
+                            <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                         </nav>
                         <div class="typewriter-divider"></div>
                     </div>
@@ -108,10 +108,10 @@ class Navbar {
                 <div class="typewriter-brand">THE UNIVERSE</div>
                 <nav class="typewriter-menu">
                     <a href="${paths.home}" class="typewriter-link ${this.currentPage === "home" ? "active" : ""}">HOME</a>
-                    <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
-                    <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
                     <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
                     <a href="#" class="typewriter-link" data-basket-link aria-haspopup="dialog">BASKET</a>
+                    <a href="${paths.roots}" class="typewriter-link ${this.currentPage === "roots" ? "active" : ""}">ROOTS</a>
+                    <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                 </nav>
             </div>
         `;
