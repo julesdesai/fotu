@@ -848,18 +848,14 @@ class ImageMorphGallery {
         Math.sin(time * particle.scintAlphaFreq + particle.scintAlphaPhase) *
           0.03 *
           scintillationIntensity;
-      // Random dropouts — when at rest, each particle independently fades in
-      // and out so the image never sits fully complete. Skipped during
-      // transitions (the morph itself supplies the visual interest there).
-      let dropoutMultiplier = 1;
-      if (!this.isTransitioning && !isBuilding) {
-        const dropoutWave =
-          Math.sin(time * particle.dropoutFreq + particle.dropoutPhase);
-        // Maps [-1, 1] → soft on/off. Threshold ~-0.3 hides roughly a third
-        // of particles at any moment; the linear ramp gives smooth fades.
-        dropoutMultiplier =
-          Math.max(0, Math.min(1, (dropoutWave + 0.3) * 2.5));
-      }
+      // Random dropouts — each particle independently fades in and out across
+      // ALL phases (build / hold / transition) so the image never reaches a
+      // fully-complete state. Smooth sine envelope hides ~a third of particles
+      // at any moment, with the missing set rotating continuously.
+      const dropoutWave =
+        Math.sin(time * particle.dropoutFreq + particle.dropoutPhase);
+      const dropoutMultiplier =
+        Math.max(0, Math.min(1, (dropoutWave + 0.3) * 2.5));
 
       const baseAlpha =
         particleAlpha * fadeMultiplier * alphaScint * buildAlpha * dropoutMultiplier;
