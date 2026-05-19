@@ -122,6 +122,7 @@ async function handleProduct(req, res) {
                     description
                     descriptionHtml
                     handle
+                    options { name values }
                     priceRange {
                         minVariantPrice {
                             amount
