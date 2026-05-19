@@ -58,13 +58,12 @@ class ShopifyStore {
                 <a class="shop-item" href="${this.escapeHtml(href)}">
                     <div class="shop-item-image">
                         ${image
-                            ? `<img src="${this.escapeHtml(image.url)}" alt="${this.escapeHtml(image.altText || product.title)}" />`
+                            ? `<img src="${this.escapeHtml(image.url)}" alt="${this.escapeHtml(image.altText || product.title)}" loading="lazy" decoding="async" />`
                             : ''
                         }
                     </div>
                     <div class="shop-item-info">
                         <h3 class="shop-item-name">${this.escapeHtml(product.title)}</h3>
-                        <p class="shop-item-description">${this.escapeHtml(product.description)}</p>
                         <p class="shop-item-price">${this.escapeHtml(this.formatPrice(price.amount, price.currencyCode))}</p>
                     </div>
                 </a>
