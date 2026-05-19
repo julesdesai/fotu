@@ -23,7 +23,11 @@
                     autocomplete="off"
                     aria-label="Search products" />
             </header>
-            <section class="shop-grid"></section>
+            <section class="shop-grid" id="shopGridActive"></section>
+            <header class="shop-section-divider" id="shopSoldOutHeader" hidden>
+                <h2 class="shop-section-title">Sold out</h2>
+            </header>
+            <section class="shop-grid" id="shopGridArchived"></section>
             <p class="shop-empty" id="shopEmpty" hidden>No products match your search.</p>
         </main>
 

@@ -54,6 +54,7 @@ async function handleProducts(req, res) {
                             title
                             description
                             handle
+                            status
                             priceRange {
                                 minVariantPrice {
                                     amount

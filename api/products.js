@@ -41,6 +41,7 @@ export default async function handler(req, res) {
                                     title
                                     description
                                     handle
+                                    status
                                     priceRange {
                                         minVariantPrice {
                                             amount

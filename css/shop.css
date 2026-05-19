@@ -67,6 +67,31 @@
     padding: var(--spacing-2xl) var(--spacing-md);
 }
 
+.shop-section-divider {
+    padding: var(--spacing-2xl) var(--spacing-2xl) 0;
+    border-top: 1px solid var(--border-color);
+    margin: var(--spacing-xl) var(--spacing-2xl) 0;
+    padding: var(--spacing-xl) 0 0;
+}
+
+.shop-section-title {
+    font-family: "Courier New", monospace;
+    font-size: clamp(20px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.shop-item--sold-out .shop-item-image {
+    opacity: 0.55;
+}
+
+.shop-item--sold-out .shop-item-price {
+    color: var(--text-muted);
+}
+
 .shop-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -131,8 +156,12 @@ a.shop-item {
 
 /* Tablet: 2 columns */
 @media (max-width: 1024px) {
-    .shop-header {
-        padding: 0 var(--spacing-lg);
+    .shop-header,
+    .shop-section-divider {
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+        margin-left: var(--spacing-lg);
+        margin-right: var(--spacing-lg);
     }
     .shop-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -143,8 +172,12 @@ a.shop-item {
 
 /* Mobile: 1 column */
 @media (max-width: 600px) {
-    .shop-header {
-        padding: 0 var(--spacing-md);
+    .shop-header,
+    .shop-section-divider {
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
     }
     .shop-grid {
         grid-template-columns: 1fr;
