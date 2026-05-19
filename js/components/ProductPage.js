@@ -7,6 +7,8 @@ class ProductPage {
         this.selectedOptions = {};   // { [optionName]: value }
         this.selectedVariant = null;
         this.qty = 1;
+        this.galleryImages = [];     // [{ url, altText }] deduped product + variant images
+        this.activeImageUrl = null;
         if (this.handle) this.init();
     }
 
@@ -37,9 +39,73 @@ class ProductPage {
         });
     }
 
+    collectGalleryImages() {
+        const seen = new Set();
+        const list = [];
+        const push = (img) => {
+            if (img && img.url && !seen.has(img.url)) {
+                seen.add(img.url);
+                list.push({ url: img.url, altText: img.altText || '' });
+            }
+        };
+        (this.product.images?.edges || []).forEach((e) => push(e.node));
+        this.variants.forEach((v) => push(v.image));
+        return list;
+    }
+
+    setActiveImage(url) {
+        if (!url) return;
+        this.activeImageUrl = url;
+        this.renderActiveImage();
+        this.renderThumbnails();
+    }
+
+    renderActiveImage() {
+        const img = document.getElementById('productImage');
+        if (!img) return;
+        const active = this.galleryImages.find((i) => i.url === this.activeImageUrl) || this.galleryImages[0];
+        if (active) {
+            img.src = active.url;
+            img.alt = active.altText || this.product.title;
+        }
+    }
+
+    renderThumbnails() {
+        const container = document.getElementById('productThumbs');
+        if (!container) return;
+        if (!this.galleryImages || this.galleryImages.length <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        container.innerHTML = this.galleryImages.map((img) => `
+            <img class="product-thumb ${img.url === this.activeImageUrl ? 'is-active' : ''}"
+                 src="${this.escapeHtml(img.url)}"
+                 alt="${this.escapeHtml(img.altText || this.product.title)}"
+                 data-url="${this.escapeHtml(img.url)}"
+                 tabindex="0"
+                 role="button"
+                 aria-label="Show ${this.escapeHtml(img.altText || this.product.title)}" />
+        `).join('');
+        container.querySelectorAll('.product-thumb').forEach((thumb) => {
+            thumb.addEventListener('click', () => {
+                this.setActiveImage(thumb.dataset.url);
+            });
+            thumb.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.setActiveImage(thumb.dataset.url);
+                }
+            });
+        });
+    }
+
     setSelectedOption(name, value) {
         this.selectedOptions[name] = value;
         this.selectedVariant = this.findVariant(this.selectedOptions) || null;
+        // When the new variant has its own image, switch the main gallery image to it.
+        if (this.selectedVariant?.image?.url) {
+            this.setActiveImage(this.selectedVariant.image.url);
+        }
         this.renderOptions();
         this.renderPriceAndButton();
     }
@@ -127,14 +193,19 @@ class ProductPage {
             }
             const v = this.selectedVariant;
             const currency = this.product.priceRange?.minVariantPrice?.currencyCode || 'GBP';
-            const image = this.product.images?.edges?.[0]?.node || null;
+            // Prefer the variant's own image; fall back to the first product image.
+            const variantImg = v.image;
+            const fallbackImg = this.product.images?.edges?.[0]?.node;
+            const image = variantImg && variantImg.url
+                ? { url: variantImg.url, altText: variantImg.altText || '' }
+                : (fallbackImg ? { url: fallbackImg.url, altText: fallbackImg.altText || '' } : null);
             window.Basket.addLine({
                 variantId: v.id,
                 quantity: this.qty,
                 title: this.product.title,
                 variantTitle: v.title,
                 price: { amount: String(v.price), currencyCode: currency },
-                image: image ? { url: image.url, altText: image.altText } : null,
+                image,
                 handle: this.product.handle,
             });
             window.dispatchEvent(new CustomEvent('basket:open'));
@@ -153,19 +224,20 @@ class ProductPage {
             );
         }
 
+        this.galleryImages = this.collectGalleryImages();
+        // Initial active image: the selected variant's image if it has one, else the first product image.
+        this.activeImageUrl = this.selectedVariant?.image?.url
+            || this.galleryImages[0]?.url
+            || null;
+
         document.title = `FOTU - ${product.title}`;
         document.getElementById('productTitle').textContent = product.title;
         // descriptionHtml is Shopify-authored content; same trust model as the original code.
         document.getElementById('productDescription').innerHTML =
             product.descriptionHtml || this.escapeHtml(product.description || '');
 
-        const image = product.images?.edges?.[0]?.node;
-        if (image) {
-            const img = document.getElementById('productImage');
-            img.src = image.url;
-            img.alt = image.altText || product.title;
-        }
-
+        this.renderActiveImage();
+        this.renderThumbnails();
         this.renderOptions();
         this.renderQty();
         this.renderPriceAndButton();

@@ -64,6 +64,11 @@ export default async function handler(req, res) {
                                             name
                                             value
                                         }
+                                        image {
+                                            id
+                                            url
+                                            altText
+                                        }
                                     }
                                 }
                             }

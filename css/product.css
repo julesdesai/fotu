@@ -24,6 +24,39 @@
     background: var(--bg-gray);
 }
 
+.product-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.product-thumb {
+    width: 64px;
+    height: 84px;
+    object-fit: cover;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.2s ease, outline-color 0.2s ease;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    background: var(--bg-gray);
+}
+
+.product-thumb:hover {
+    opacity: 0.85;
+}
+
+.product-thumb.is-active {
+    opacity: 1;
+    outline-color: var(--text-dark);
+}
+
+.product-thumb:focus-visible {
+    outline: 2px solid var(--text-dark);
+    outline-offset: 2px;
+}
+
 .product-details {
     padding: var(--spacing-lg) 0;
 }

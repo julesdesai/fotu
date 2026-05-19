@@ -146,6 +146,11 @@ async function handleProduct(req, res) {
                                     name
                                     value
                                 }
+                                image {
+                                    id
+                                    url
+                                    altText
+                                }
                             }
                         }
                     }
