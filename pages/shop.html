@@ -10,7 +10,17 @@
     </head>
     <body>
         <main class="shop-main">
+            <header class="shop-header">
+                <input
+                    type="search"
+                    class="shop-search"
+                    id="shopSearch"
+                    placeholder="SEARCH"
+                    autocomplete="off"
+                    aria-label="Search products" />
+            </header>
             <section class="shop-grid"></section>
+            <p class="shop-empty" id="shopEmpty" hidden>No products match your search.</p>
         </main>
 
         <script src="../js/components/Navbar.js"></script>
