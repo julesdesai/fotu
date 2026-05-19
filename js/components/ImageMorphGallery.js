@@ -49,8 +49,8 @@ class ImageMorphGallery {
     this.maskCtx = null;
     this.textConfig = {
       text: "FOTU",
-      fontFamily: "Arial, sans-serif",
-      fontWeight: "300", // Slightly bolder for more visibility
+      fontFamily: '"Courier New", monospace',
+      fontWeight: "700",
       baseFontSize: 0,
     };
 
@@ -538,6 +538,10 @@ class ImageMorphGallery {
         scintAmpY: 0.1 + Math.random() * 0.3,
         scintAlphaPhase: Math.random() * Math.PI * 2,
         scintAlphaFreq: 0.3 + Math.random() * 0.7,
+        // Random dropout parameters — each particle independently fades in/out
+        // during the at-rest phase so the image never sits fully complete.
+        dropoutPhase: Math.random() * Math.PI * 2,
+        dropoutFreq: 0.18 + Math.random() * 0.42,
         // Random walk parameters
         walkOffsetX: 0,
         walkOffsetY: 0,
@@ -632,6 +636,9 @@ class ImageMorphGallery {
           scintAmpY: 0.1 + Math.random() * 0.3,
           scintAlphaPhase: Math.random() * Math.PI * 2,
           scintAlphaFreq: 0.3 + Math.random() * 0.7,
+          // Random dropout parameters — see notes in the other particle factory
+          dropoutPhase: Math.random() * Math.PI * 2,
+          dropoutFreq: 0.18 + Math.random() * 0.42,
           // Random walk parameters
           walkOffsetX: 0,
           walkOffsetY: 0,
@@ -841,8 +848,21 @@ class ImageMorphGallery {
         Math.sin(time * particle.scintAlphaFreq + particle.scintAlphaPhase) *
           0.03 *
           scintillationIntensity;
+      // Random dropouts — when at rest, each particle independently fades in
+      // and out so the image never sits fully complete. Skipped during
+      // transitions (the morph itself supplies the visual interest there).
+      let dropoutMultiplier = 1;
+      if (!this.isTransitioning && !isBuilding) {
+        const dropoutWave =
+          Math.sin(time * particle.dropoutFreq + particle.dropoutPhase);
+        // Maps [-1, 1] → soft on/off. Threshold ~-0.3 hides roughly a third
+        // of particles at any moment; the linear ramp gives smooth fades.
+        dropoutMultiplier =
+          Math.max(0, Math.min(1, (dropoutWave + 0.3) * 2.5));
+      }
+
       const baseAlpha =
-        particleAlpha * fadeMultiplier * alphaScint * buildAlpha;
+        particleAlpha * fadeMultiplier * alphaScint * buildAlpha * dropoutMultiplier;
       if (baseAlpha <= 0) continue;
 
       // Apply subtle position scintillation (particles gently drift)
@@ -1303,6 +1323,6 @@ document.addEventListener("DOMContentLoaded", () => {
     transitionDuration: 7000, // Slower fade for gentler transitions
     holdDuration: 5000, // Time to appreciate scintillation at rest
     proximityWeight: 0.8,
-    particleSize: 2, // Smaller particles for sharper image
+    particleSize: 4, // ~4x fewer particles than size 2; lighter on CPU, still readable
   });
 });
