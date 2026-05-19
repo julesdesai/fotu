@@ -5,23 +5,21 @@
 
 .shop-header {
     padding: 0 var(--spacing-2xl);
-    display: flex;
-    justify-content: flex-end;
 }
 
 .shop-search {
     font-family: "Courier New", monospace;
-    font-size: 12px;
+    font-size: clamp(28px, 5vw, 56px);
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    line-height: 1.1;
     color: var(--text-dark);
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--border-color);
-    padding: var(--spacing-sm) 0;
-    width: 280px;
-    max-width: 100%;
+    border-bottom: 2px solid var(--border-color);
+    padding: var(--spacing-md) 0;
+    width: 100%;
     outline: none;
     transition: border-bottom-color 0.2s ease;
     -webkit-appearance: none;
@@ -29,8 +27,8 @@
 }
 
 .shop-search::placeholder {
-    color: rgba(60, 60, 60, 0.35);
-    letter-spacing: 0.08em;
+    color: rgba(60, 60, 60, 0.25);
+    letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
@@ -42,15 +40,15 @@
 .shop-search::-webkit-search-cancel-button {
     -webkit-appearance: none;
     appearance: none;
-    width: 12px;
-    height: 12px;
+    width: 20px;
+    height: 20px;
     background: transparent;
     border: none;
     cursor: pointer;
     background-image: linear-gradient(45deg, transparent 45%, var(--text-muted) 45%, var(--text-muted) 55%, transparent 55%),
         linear-gradient(-45deg, transparent 45%, var(--text-muted) 45%, var(--text-muted) 55%, transparent 55%);
     background-size: 100% 100%;
-    margin-left: var(--spacing-sm);
+    margin-left: var(--spacing-md);
 }
 
 .shop-search::-webkit-search-cancel-button:hover {
@@ -147,10 +145,6 @@ a.shop-item {
 @media (max-width: 600px) {
     .shop-header {
         padding: 0 var(--spacing-md);
-        justify-content: stretch;
-    }
-    .shop-search {
-        width: 100%;
     }
     .shop-grid {
         grid-template-columns: 1fr;
