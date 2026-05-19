@@ -34,6 +34,9 @@ async function handleProducts(req, res) {
             client_secret: SHOPIFY_CLIENT_SECRET,
         }),
     });
+    if (!tokenRes.ok) {
+        throw new Error(`Shopify token request failed: ${tokenRes.status}`);
+    }
     const { access_token } = await tokenRes.json();
 
     const productsRes = await fetch(`https://${SHOPIFY_STORE_DOMAIN}/admin/api/2024-01/graphql.json`, {
@@ -106,6 +109,9 @@ async function handleProduct(req, res) {
             client_secret: SHOPIFY_CLIENT_SECRET,
         }),
     });
+    if (!tokenRes.ok) {
+        throw new Error(`Shopify token request failed: ${tokenRes.status}`);
+    }
     const { access_token } = await tokenRes.json();
 
     const productRes = await fetch(`https://${SHOPIFY_STORE_DOMAIN}/admin/api/2024-01/graphql.json`, {
