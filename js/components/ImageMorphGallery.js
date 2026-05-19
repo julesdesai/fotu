@@ -477,18 +477,32 @@ class ImageMorphGallery {
     const sourceData = this.sampleImageData(sourceImg, true);
 
     const cellSize = this.config.particleSize;
-    const cols = Math.ceil(this.width / cellSize);
-    const rows = Math.ceil(this.height / cellSize);
+    // Use a finer placement grid than the rendered particle size so we can
+    // pack more particles into the centre without raising the global cell
+    // resolution. Radial rejection sampling below thins the edges back out
+    // so net particle count stays in the same ballpark as a uniform grid.
+    const placementCellSize = Math.max(1, Math.floor(cellSize / 2));
+    const cols = Math.ceil(this.width / placementCellSize);
+    const rows = Math.ceil(this.height / placementCellSize);
+    const centerX = this.width / 2;
+    const centerY = this.height / 2;
 
-    // Create all particle slots first (empty/invisible)
-    const totalParticles = cols * rows;
     const allPositions = [];
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        const x = col * cellSize + cellSize / 2;
-        const y = row * cellSize + cellSize / 2;
-        if (x < this.width && y < this.height) {
+        const x = col * placementCellSize + placementCellSize / 2;
+        const y = row * placementCellSize + placementCellSize / 2;
+        if (x >= this.width || y >= this.height) continue;
+        // Normalised radial distance². 0 at centre, 2 at corners.
+        const dxN = (x - centerX) / centerX;
+        const dyN = (y - centerY) / centerY;
+        const r2 = dxN * dxN + dyN * dyN;
+        // Keep probability: 1.0 at centre, ~0.05 floor at the corners.
+        // Linear-in-r² falloff concentrates detail in the central region
+        // while leaving sparse particles around the edges for context.
+        const keepProb = Math.max(0.05, 1.0 - r2 * 1.0);
+        if (Math.random() <= keepProb) {
           allPositions.push({ x, y, row, col });
         }
       }
@@ -601,15 +615,27 @@ class ImageMorphGallery {
     // Sample with current mask baked in
     const sourceData = this.sampleImageData(sourceImg, true);
     const cellSize = this.config.particleSize;
-    const cols = Math.ceil(this.width / cellSize);
-    const rows = Math.ceil(this.height / cellSize);
+    // Same radial-density grid as in loadImagesProgressively — finer
+    // placement cells + rejection sampling that concentrates particles
+    // in the centre.
+    const placementCellSize = Math.max(1, Math.floor(cellSize / 2));
+    const cols = Math.ceil(this.width / placementCellSize);
+    const rows = Math.ceil(this.height / placementCellSize);
+    const centerX = this.width / 2;
+    const centerY = this.height / 2;
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        const x = col * cellSize + cellSize / 2;
-        const y = row * cellSize + cellSize / 2;
+        const x = col * placementCellSize + placementCellSize / 2;
+        const y = row * placementCellSize + placementCellSize / 2;
 
         if (x >= this.width || y >= this.height) continue;
+
+        const dxN = (x - centerX) / centerX;
+        const dyN = (y - centerY) / centerY;
+        const r2 = dxN * dxN + dyN * dyN;
+        const keepProb = Math.max(0.05, 1.0 - r2 * 1.0);
+        if (Math.random() > keepProb) continue;
 
         const sourceColor = this.getColorAt(sourceData, x, y);
 

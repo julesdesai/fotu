@@ -397,8 +397,11 @@ class SnakeGame {
                 (playerHead.x - this.fakeFood.x) ** 2 + (playerHead.y - this.fakeFood.y) ** 2
             );
             
-            // Fake food moves away when player gets within 3 grid squares
-            if (distance < this.gridSize * 3) {
+            // Fake food flees when the player gets within 6 grid squares —
+            // teleport must fire BEFORE the snake head visibly overlaps the
+            // food (the 0.08-speed easeOutQuart animation needs lead time
+            // or the snake reaches the food before the move is perceptible).
+            if (distance < this.gridSize * 6) {
                 this.animateFoodMovement();
                 this.fakeFoodDisappearances++;
                 this.playSound('proximity'); // Sad sound when food disappears
@@ -424,12 +427,14 @@ class SnakeGame {
             foodX = gridX * this.gridSize;
             foodY = gridY * this.gridSize;
             
-            // Ensure fake food spawns away from player (at least 5 grid squares)
+            // Ensure fake food spawns well outside the flee-trigger radius
+            // (which is gridSize * 6) so a fresh spawn isn't immediately
+            // teleported away.
             const distanceFromPlayer = Math.sqrt(
                 (playerHead.x - foodX) ** 2 + (playerHead.y - foodY) ** 2
             );
-            
-            if (distanceFromPlayer > this.gridSize * 5) {
+
+            if (distanceFromPlayer > this.gridSize * 9) {
                 validPosition = true;
                 
                 // Also check it's not too close to snake segments
@@ -492,7 +497,7 @@ class SnakeGame {
             );
             
             attempts++;
-        } while (attempts < 50 && Math.sqrt((playerHead.x - newX) ** 2 + (playerHead.y - newY) ** 2) < this.gridSize * 6);
+        } while (attempts < 50 && Math.sqrt((playerHead.x - newX) ** 2 + (playerHead.y - newY) ** 2) < this.gridSize * 10);
         
         // Create animated food movement
         this.fakeFood.isAnimating = true;
@@ -567,9 +572,10 @@ class SnakeGame {
         const centerX = (playerHead.x + aiHead.x) / 2;
         const centerY = (playerHead.y + aiHead.y) / 2;
         
-        // Create heart-shaped particles
-        for (let i = 0; i < 30; i++) {
-            const angle = (Math.PI * 2 / 30) * i;
+        // Create heart-shaped particles — fewer than before so the food
+        // remains locatable through the explosion.
+        for (let i = 0; i < 18; i++) {
+            const angle = (Math.PI * 2 / 18) * i;
             const speed = 2 + Math.random() * 3;
             
             this.heartParticles.push({
@@ -680,8 +686,10 @@ class SnakeGame {
             return trail.life > 0;
         });
         
-        // Create decay elements randomly in psychedelic mode
-        if (this.psychedelicMode && Math.random() < 0.3) {
+        // Create decay elements randomly in psychedelic mode. Spawn rate
+        // tuned down from 0.30 to 0.12 so the background layer doesn't drown
+        // out the food's red against the green field.
+        if (this.psychedelicMode && Math.random() < 0.12) {
             this.createDecayElement();
         }
         
@@ -979,16 +987,18 @@ class SnakeGame {
         const gridX = this.food.x;
         const gridY = this.food.y;
         
-        // Pulsing glow effect
+        // Pulsing glow effect — bumped radius (2→4 base, +pulse) and alpha
+        // (0.4→0.65) so the apple stays locatable against the psychedelic
+        // background layer.
         const pulse = Math.sin(this.food.glow) * 0.5 + 0.5;
-        const glowRadius = 2 + Math.floor(pulse * 2);
-        
+        const glowRadius = 4 + Math.floor(pulse * 3);
+
         // Draw glow
         for (let dx = -glowRadius; dx <= glowRadius; dx++) {
             for (let dy = -glowRadius; dy <= glowRadius; dy++) {
                 const distance = Math.abs(dx) + Math.abs(dy);
                 if (distance <= glowRadius) {
-                    const alpha = (1 - (distance / glowRadius)) * pulse * 0.4;
+                    const alpha = (1 - (distance / glowRadius)) * pulse * 0.65;
                     this.ctx.fillStyle = `rgba(255, 255, 100, ${alpha})`;
                     this.ctx.fillRect(
                         gridX + dx * this.pixelSize,
@@ -1105,10 +1115,12 @@ class SnakeGame {
     
     drawDecayElements() {
         this.decayElements.forEach(element => {
-            const alpha = element.life;
-            const saturation = this.psychedelicMode ? 80 : 40;
+            // Slightly faded alpha and lower saturation in psychedelic mode
+            // keeps the decay layer visible without competing with the food.
+            const alpha = element.life * 0.7;
+            const saturation = this.psychedelicMode ? 55 : 40;
             const lightness = 50 + Math.sin(this.time * 0.05) * 20;
-            
+
             this.ctx.fillStyle = `hsla(${element.hue}, ${saturation}%, ${lightness}%, ${alpha})`;
             
             // Different decay patterns
