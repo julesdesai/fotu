@@ -71,7 +71,7 @@ class Navbar {
                         <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                         <a href="${paths.about}" class="typewriter-link ${this.currentPage === "about" ? "active" : ""}">ABOUT</a>
                         <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
-                        <a href="#" class="typewriter-link" data-cart-link>CART</a>
+                        <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
                     </nav>
                     <div class="typewriter-divider"></div>
                 </div>
@@ -91,7 +91,7 @@ class Navbar {
                             <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                             <a href="${paths.about}" class="typewriter-link ${this.currentPage === "about" ? "active" : ""}">ABOUT</a>
                             <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
-                            <a href="#" class="typewriter-link" data-cart-link>CART</a>
+                            <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
                         </nav>
                     </div>
                 </aside>
@@ -113,7 +113,7 @@ class Navbar {
                     <a href="${paths.game}" class="typewriter-link ${this.currentPage === "ouroboros-protocol" ? "active" : ""}">OUROBOROS PROTOCOL</a>
                     <a href="${paths.about}" class="typewriter-link ${this.currentPage === "about" ? "active" : ""}">ABOUT</a>
                     <a href="${paths.shop}" class="typewriter-link ${this.currentPage === "shop" ? "active" : ""}">SHOP</a>
-                    <a href="#" class="typewriter-link" data-cart-link>CART</a>
+                    <a href="#" class="typewriter-link" data-cart-link aria-haspopup="dialog">CART</a>
                 </nav>
             </div>
         `;
@@ -169,11 +169,10 @@ class Navbar {
       a.addEventListener('click', (e) => {
         e.preventDefault();
         window.dispatchEvent(new CustomEvent('cart:open'));
-        document.querySelector('.mobile-nav-overlay')?.classList.remove('active');
       });
     });
     window.addEventListener('cart:updated', (e) => refresh(e.detail.totalQuantity || 0));
-    if (window.Cart) refresh(window.Cart.state.totalQuantity || 0);
+    if (window.Cart) refresh(window.Cart?.state?.totalQuantity ?? 0);
   }
 
   init() {

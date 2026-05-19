@@ -10,8 +10,9 @@
     class Cart {
         constructor() {
             this.lines = this._load();
-            // Defer the first emit until the next tick so subscribers attached
-            // on DOMContentLoaded see initial state.
+            // Defer the emit so it fires after window.Cart is fully assigned.
+            // Subscribers loaded after this script must read window.Cart.state
+            // directly on init; the initial emit fires before they're listening.
             queueMicrotask(() => this._emit());
         }
 
