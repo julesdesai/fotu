@@ -501,7 +501,8 @@ class ImageMorphGallery {
         // Keep probability: 1.0 at centre, ~0.05 floor at the corners.
         // Linear-in-r² falloff concentrates detail in the central region
         // while leaving sparse particles around the edges for context.
-        const keepProb = Math.max(0.05, 1.0 - r2 * 1.0);
+        const keepProb =
+          Math.max(0.05, 1.0 - r2 * 1.0) * this.topLeftKeepFactor(x, y);
         if (Math.random() <= keepProb) {
           allPositions.push({ x, y, row, col });
         }
@@ -634,7 +635,8 @@ class ImageMorphGallery {
         const dxN = (x - centerX) / centerX;
         const dyN = (y - centerY) / centerY;
         const r2 = dxN * dxN + dyN * dyN;
-        const keepProb = Math.max(0.05, 1.0 - r2 * 1.0);
+        const keepProb =
+          Math.max(0.05, 1.0 - r2 * 1.0) * this.topLeftKeepFactor(x, y);
         if (Math.random() > keepProb) continue;
 
         const sourceColor = this.getColorAt(sourceData, x, y);
@@ -673,6 +675,21 @@ class ImageMorphGallery {
         });
       }
     }
+  }
+
+  topLeftKeepFactor(x, y) {
+    // Thin out particles near the top-left corner so the FOTU wordmark /
+    // nav overlay stays legible over busy background images. Returns a
+    // density multiplier: a sparse floor at the corner ramping smoothly up
+    // to 1.0 at the edge of the protected zone (and 1.0 everywhere else).
+    const zoneW = this.width * 0.4;
+    const zoneH = this.height * 0.35;
+    const dx = x / zoneW;
+    const dy = y / zoneH;
+    const d = Math.sqrt(dx * dx + dy * dy); // 0 at corner, 1 at zone edge
+    if (d >= 1) return 1;
+    const floor = 0.15;
+    return floor + (1 - floor) * d;
   }
 
   calculateTargetPosition(x, y, sourceColor, targetData) {

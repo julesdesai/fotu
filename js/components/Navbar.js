@@ -101,7 +101,7 @@ class Navbar {
 
     // Mobile nav toggle and overlay (all pages)
     const mobileNav = `
-            <button class="mobile-nav-toggle">MENU</button>
+            <button class="mobile-nav-toggle" aria-label="Open menu">FOTU</button>
             <div class="mobile-nav-overlay">
                 <button class="mobile-nav-close">✕ CLOSE</button>
                 <div class="typewriter-brand">FABRIC OF</div>

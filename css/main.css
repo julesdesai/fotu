@@ -187,15 +187,24 @@ body.has-sidebar main {
     top: var(--spacing-md);
     left: var(--spacing-md);
     z-index: 1000;
-    background: var(--bg-light);
-    border: 1px solid var(--border-color);
+    background: transparent;
+    border: none;
+    /* generous hit area while keeping the wordmark flush top-left */
     padding: var(--spacing-sm) var(--spacing-md);
+    margin: calc(-1 * var(--spacing-sm)) calc(-1 * var(--spacing-md));
+    color: rgba(30, 30, 30, 0.9);
     font-family: "Courier New", monospace;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     cursor: pointer;
+    transition: opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-toggle:active {
+    opacity: 0.5;
 }
 
 .mobile-nav-overlay {
