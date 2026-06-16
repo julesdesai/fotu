@@ -175,7 +175,7 @@ a.shop-item {
     }
 }
 
-/* Mobile: 1 column */
+/* Mobile: 2 columns */
 @media (max-width: 600px) {
     .shop-header,
     .shop-section-divider {
@@ -185,8 +185,8 @@ a.shop-item {
         margin-right: var(--spacing-md);
     }
     .shop-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-lg);
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
         padding: var(--spacing-md);
     }
 }
