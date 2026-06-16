@@ -321,6 +321,35 @@ body.has-sidebar main {
     line-height: 1.3;
 }
 
+/* Instagram handle pinned to the bottom of the landing-page right column */
+.hero-instagram {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-bottom: 1.3em;
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: lowercase;
+    letter-spacing: 0.03em;
+    color: rgba(60, 60, 60, 0.5);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.hero-instagram:hover {
+    color: rgba(60, 60, 60, 0.8);
+}
+
+.hero-instagram-icon {
+    width: 9px;
+    height: 9px;
+    flex-shrink: 0;
+    /* thinner stroke so the glyph reads as light as the 400-weight text */
+    stroke-width: 1.5;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .site-sidebar {

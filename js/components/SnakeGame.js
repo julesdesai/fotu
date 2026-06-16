@@ -47,6 +47,7 @@ class SnakeGame {
         
         this.initSnakes();
         this.initEventListeners();
+        this.initTouchControls();
         this.initShaders();
         this.initAudio();
         
@@ -171,6 +172,52 @@ class SnakeGame {
         });
     }
     
+    initTouchControls() {
+        const dirMap = {
+            up: { x: 0, y: -1 },
+            down: { x: 0, y: 1 },
+            left: { x: -1, y: 0 },
+            right: { x: 1, y: 0 }
+        };
+
+        // Swipe gestures anywhere on the canvas
+        const threshold = 24; // px before a drag counts as a swipe
+        let startX = 0;
+        let startY = 0;
+        let swiping = false;
+
+        this.canvas.addEventListener('touchstart', (e) => {
+            const t = e.changedTouches[0];
+            startX = t.clientX;
+            startY = t.clientY;
+            swiping = true;
+            this.resumeAudio();
+        }, { passive: true });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (!swiping) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - startX;
+            const dy = t.clientY - startY;
+            if (Math.max(Math.abs(dx), Math.abs(dy)) < threshold) return;
+
+            e.preventDefault();
+            if (Math.abs(dx) > Math.abs(dy)) {
+                this.changeDirection(dx > 0 ? dirMap.right : dirMap.left);
+            } else {
+                this.changeDirection(dy > 0 ? dirMap.down : dirMap.up);
+            }
+
+            // Reset origin so a continued drag can register further turns
+            startX = t.clientX;
+            startY = t.clientY;
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', () => {
+            swiping = false;
+        }, { passive: true });
+    }
+
     initShaders() {
         // Create off-screen canvas for post-processing effects
         this.effectCanvas = document.createElement('canvas');
@@ -246,12 +293,24 @@ class SnakeGame {
         
         // Update direction immediately (classic snake behavior)
         if (newDir && inputDetected) {
-            // Prevent reversing into self
-            const currentDir = this.playerSnake.direction;
-            if (!(newDir.x === -currentDir.x && newDir.y === -currentDir.y)) {
-                this.playerSnake.direction = newDir;
-                this.hasPlayerMoved = true;
-            }
+            this.changeDirection(newDir);
+        }
+    }
+
+    // Shared by keyboard, swipe, and the on-screen D-pad.
+    changeDirection(newDir) {
+        if (!newDir) return;
+        // Prevent reversing into self
+        const currentDir = this.playerSnake.direction;
+        if (!(newDir.x === -currentDir.x && newDir.y === -currentDir.y)) {
+            this.playerSnake.direction = newDir;
+            this.hasPlayerMoved = true;
+        }
+    }
+
+    resumeAudio() {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
         }
     }
     

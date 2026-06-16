@@ -76,6 +76,12 @@ class Navbar {
                 </div>
             `;
       leftTypewriter.insertAdjacentHTML("afterbegin", navContent);
+
+      // Instagram handle under the credit block, bottom-right of the hero
+      const heroCredit = document.querySelector(".hero-credit");
+      if (heroCredit) {
+        heroCredit.insertAdjacentHTML("afterbegin", this.getInstagramHTML());
+      }
     } else {
       // Other pages: create a fixed sidebar that mirrors the home-page typewriter column structure
       const sidebar = `
@@ -146,10 +152,24 @@ class Navbar {
     }
   }
 
+  getInstagramHTML() {
+    return `
+            <a class="hero-instagram" href="https://www.instagram.com/fotu.ldn" target="_blank" rel="noopener noreferrer" aria-label="FOTU on Instagram">
+                <svg class="hero-instagram-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                <span>@fotu.ldn</span>
+            </a>
+        `;
+  }
+
   getFooterHTML() {
     return `
             <footer class="footer">
                 <div class="footer-minimal">
+                    ${this.getInstagramHTML()}
                     <p>Website by Sea Elegans<br>in collaboration with FOTU</p>
                     <p>&copy; FOTU 2026</p>
                 </div>

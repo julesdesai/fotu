@@ -45,30 +45,19 @@ class TypewriterBanner {
     
     updateCursorPosition() {
         if (!this.cursor) return;
-        
-        // Create a temporary span to measure text position
-        const temp = document.createElement('span');
-        temp.style.font = window.getComputedStyle(this.bannerText).font;
-        temp.style.visibility = 'hidden';
-        temp.style.position = 'absolute';
-        temp.style.whiteSpace = 'pre';
-        
-        // Get current line and position
-        const currentLineText = this.lines[this.currentLineIndex] || '';
-        temp.textContent = currentLineText;
-        document.body.appendChild(temp);
-        
-        const textWidth = temp.offsetWidth;
-        const lineHeight = 20; // Approximate line height
-        
-        document.body.removeChild(temp);
-        
-        // Position cursor
+
+        // renderLines() drops a zero-width marker at the real end of the
+        // current line. Reading its measured position keeps the cursor glued
+        // to the text through line wrapping, bold words, and letter-spacing —
+        // none of which hand-computed math accounted for.
+        const marker = this.bannerText.querySelector('.caret-marker');
+        if (!marker) return;
+
         const containerRect = this.container.getBoundingClientRect();
-        const bannerRect = this.bannerText.getBoundingClientRect();
-        
-        this.cursor.style.left = (bannerRect.left - containerRect.left + textWidth) + 'px';
-        this.cursor.style.top = (bannerRect.top - containerRect.top + (this.currentLineIndex * lineHeight)) + 'px';
+        const markerRect = marker.getBoundingClientRect();
+
+        this.cursor.style.left = (markerRect.left - containerRect.left) + 'px';
+        this.cursor.style.top = (markerRect.top - containerRect.top) + 'px';
     }
     
     startStochasticTypewriter() {
@@ -155,12 +144,19 @@ class TypewriterBanner {
 
     renderLines() {
         // Process lines to add bold formatting for specific words
-        const processedLines = this.lines.map(line => {
-            return line
+        const processedLines = this.lines.map((line, idx) => {
+            let html = line
                 .replace(/FABRIC/g, '<strong>FABRIC</strong>')
                 .replace(/UNIVERSE/g, '<strong>UNIVERSE</strong>');
+            // Mark the end of the line currently being typed so the cursor
+            // can be positioned at the true caret location. The zero-width
+            // space gives the empty span a line box to measure against.
+            if (idx === this.currentLineIndex) {
+                html += '<span class="caret-marker">​</span>';
+            }
+            return html;
         });
-        
+
         this.bannerText.innerHTML = processedLines.join('<br>');
     }
 }

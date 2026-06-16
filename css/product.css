@@ -94,6 +94,18 @@
     line-height: 1.6;
 }
 
+.product-handmade-note {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text-muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
 .product-back {
     font-family: "Courier New", monospace;
     font-size: 11px;
